@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "52117e9288590757a1960418abbd70b52022dcef",
+  "commitSha": "ab396dc3ace91d50676f0ceb2e5adb9721f0d1a5",
   "decision": "Decidimos verificar la linea base y documentar la falla controlada usando un solo comando reproducible existente, npm run test:smoke, y provocando la falla cambiando deliberadamente el titulo en App.tsx de 'CampusOps' a 'Campus Application'. Elegimos una falla de contenido reversible y detectable por la prueba existente (que busca el texto 'CampusOps') porque se ajusta a la restriccion de no modificar las pruebas y permite distinguir claramente sintoma (el mensaje 'Unable to find an element with text: CampusOps') de causa (el cambio del texto en App.tsx), lo que respalda el criterio de diagnostico de la rubrica.",
   "alternatives": [
     "Alternativa A: provocar la falla en src/api/courseBackend.ts cambiando el contrato esperado (por ejemplo, hacer que getBackendHealth rechace con 'Backend health contract mismatch' alterando la validacion). Esta opcion tambien es detectable por el smoke test, pero toca logica de red y de contrato, lo que mezcla el diagnostico de la linea base con el comportamiento remoto y es mas propenso a enmascarar el punto de fallo.",
