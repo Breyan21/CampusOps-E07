@@ -1,19 +1,18 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Conserven exactamente tres integrantes y usen SHA Git completos de commits creados por cada persona.",
   "schemaVersion": 1,
   "week": 1,
-  "teamId": "REEMPLAZAR_CON_ID_DEL_EQUIPO",
+  "teamId": "equipo07",
   "members": [
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_1",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
+      "studentId": "MigueleArt",
+      "commitShas": ["43a1c2a463d3df48b6494d2cbb9edeefc4b02b90"],
+      "files": ["docs/problem-definition.md", "docs/risk-register.md", "App.tsx"],
+      "tests": ["npm run test:smoke"],
       "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "prediction": "Esperaba que al cambiar temporalmente el texto del titulo en App.tsx de 'CampusOps' a 'Campus Application', el smoke test fallara, porque la prueba busca el texto 'CampusOps' para comprobar la linea base. Tambien esperaba que tras revertir el cambio el mismo comando volviera a pasar.",
+      "command": "npm run test:smoke",
+      "observedResult": "El comando fallo con 'Unable to find an element with text: CampusOps' mientras el titulo estaba modificado; al restaurar 'CampusOps' en App.tsx el mismo comando paso con 'PASS course-tests/smoke.test.tsx'.",
+      "explanation": "La prueba verifica que la linea base se renderiza y que el backend llega a 'available'. El cambio del titulo altero el texto que la prueba busca, produciendo el sintoma; revertir la causa (restaurar 'CampusOps') hizo que reapareciera el elemento y el test pasara, lo que demostro la correccion sin modificar ninguna prueba."
     },
     {
       "studentId": "REEMPLAZAR_INTEGRANTE_2",
