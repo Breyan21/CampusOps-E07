@@ -1,0 +1,33 @@
+flowchart TD
+    UI[UI
+Pantallas y navegación] --> application[application
+Casos de uso]
+    application --> domain[domain
+Entidades y reglas]
+
+    infrastructure[infrastructure
+Adaptadores y servicios externos]
+    infrastructure -. implementa contratos del domain .-> domain
+
+    UI --> Reportante[Perfil: Reportante]
+    UI --> Tecnico[Perfil: Técnico]
+    UI --> Coordinador[Perfil: Coordinador]
+
+    application --> Incidencias[Incidencias]
+    application --> Sesion[Sesión]
+    application --> Persistencia[Persistencia]
+    application --> ProveedorUbicacion[Proveedor de ubicación]
+
+    infrastructure --> Incidencias
+    infrastructure --> Sesion
+    infrastructure --> Persistencia
+    infrastructure --> ProveedorUbicacion
+
+    classDef layer fill:#eef2ff,stroke:#3730a3,color:#111827
+    class UI,application,domain,infrastructure layer
+
+    classDef profile fill:#ecfeff,stroke:#0f766e,color:#111827
+    class Reportante,Tecnico,Coordinador profile
+
+    classDef future fill:#fef3c7,stroke:#b45309,color:#111827
+    class Incidencias,Sesion,Persistencia,ProveedorUbicacion future

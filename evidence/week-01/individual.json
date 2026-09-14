@@ -17,14 +17,14 @@
     },
     {
       "studentId": "REEMPLAZAR_INTEGRANTE_2",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
+      "commitShas": ["772e2dd2ecef635e9c339d237666f7ef2948b2b2"],
+      "files": ["docs/risk-register.md"],
+      "tests": [ "Revisión de que el documento contiene exactamente tres riesgos priorizados"],
       "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "prediction": "Esperaba que el registro describiera tres riesgos concretos relacionados con CampusOps",
+      "command": "grep -R \"REEMPLAZAR\" docs/risk-register.md",
+      "observedResult": "No quedaron indicaciones pendientes en el archivo",
+      "explanation": "Completé el registro de riesgos y documenté cómo se comprobará cada mitigación"
     },
     {
       "studentId": "REEMPLAZAR_INTEGRANTE_3",
