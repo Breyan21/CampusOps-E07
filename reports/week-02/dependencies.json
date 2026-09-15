@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "week": 2,
+  "commitSha": "835ad1cfbd4ea859f91b02874a050c51064a823e",
+  "generatedAt": "2026-09-14T23:00:00-06:00",
+  "checks": [
+    {
+      "id": "falla-limite",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "npm run test -- course-tests/architecture-boundaries.test.ts",
+      "evidence": "Síntoma: El test de límites falló. Detalle: 'Direct import of infrastructure found in UI file: src/ui/incidents/IncidentListScreen.tsx'. Causa: Importamos intencionalmente InMemoryIncidentRepository directamente en la UI. Esto contradice nuestro ADR de no acoplar la UI con la infraestructura (AC-03)."
+    },
+    {
+      "id": "correccion-limite",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm run test -- course-tests/architecture-boundaries.test.ts",
+      "evidence": "Tras cambiar la UI para recibir las dependencias mediante Inyección de Dependencias a través de App.tsx (pasándole los Casos de Uso en vez de instanciar el repositorio directo), el mismo test de límites pasó con 0 fallos. Esto demuestra que respetamos el límite arquitectónico acordado."
+    }
+  ]
+}

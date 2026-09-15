@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "week": 2,
+  "commitSha": "835ad1cfbd4ea859f91b02874a050c51064a823e",
+  "decision": "Decidimos implementar una arquitectura de 4 capas: UI -> Aplicación -> Dominio <- Infraestructura para desacoplar el origen de los datos de la presentación, cumpliendo con AC-01 y AC-03.",
+  "alternatives": [
+    "Alternativa A: Que los componentes UI consuman directamente la infraestructura (repositorio o HTTP). Es más rápido de programar, pero acopla el código visual con las reglas de datos, volviéndolo difícil de testear y de cambiar en el futuro sin modificar pantallas.",
+    "Alternativa B (elegida): Separación por capas UI -> Application -> Domain <- Infrastructure. Exige escribir más código inicial (casos de uso e interfaces), pero aísla la UI, permite cambiar la base de datos sin afectar presentación y facilita las pruebas unitarias."
+  ],
+  "tradeoff": "Beneficio: Alta testabilidad y posibilidad de sustituir implementaciones (ej. fake por HTTP real) sin tocar las pantallas (UI). Costo: Requiere más archivos (UseCases, Domain model) y un inyector de dependencias centralizado (Composition Root) que añade complejidad inicial.",
+  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04"],
+  "verification": [
+    {
+      "command": "npm run test -- course-tests/architecture-boundaries.test.ts",
+      "result": "El test programado asegura que ningún componente de UI importe código de infrastructure.",
+      "evidence": "El test se ejecutó y pasó exitosamente confirmando que las fronteras se respetan."
+    }
+  ]
+}
