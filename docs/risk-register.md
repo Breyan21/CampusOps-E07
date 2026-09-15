@@ -1,4 +1,4 @@
-﻿# Registro de riesgos — CampusOps
+# Registro de riesgos — CampusOps
 
 > Registren exactamente tres riesgos y ordénenlos del más al menos prioritario.
 
