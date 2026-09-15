@@ -1,48 +1,40 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Conserven exactamente tres integrantes y usen SHA Git completos de commits creados por cada persona.",
   "schemaVersion": 1,
-  "week": 1,
-  "teamId": "REEMPLAZAR_CON_ID_DEL_EQUIPO",
+  "week": 2,
+  "teamId": "equipo07",
   "members": [
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_1",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
+      "studentId": "3523110153", 
+      "commitShas": ["87ef259abccf6f9672842b7d916f636092137cb3"],
+      "files": ["docs/adr/ADR-001-architecture.md", "docs/architecture.mmd"],
       "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "reviews": ["Revisión de límites arquitectónicos en el diagrama Mermaid y justificación de capas en el ADR"],
+      "prediction": "Esperaba que el ADR justificara la Alternativa B y que el diagrama mostrara las 4 capas sin dependencias directas entre UI e infraestructura",
+      "command": "cat docs/architecture.mmd",
+      "observedResult": "El diagrama incluye los tres perfiles y las capas correctamente estructuradas respetando la inversión de dependencias",
+      "explanation": "Definí la arquitectura por capas en el ADR y tracé las dependencias permitidas y responsabilidades futuras en el diagrama"
     },
-  {
-  "studentId": "3523110153", 
-  "commitShas": [
-    "87ef259abccf6f9672842b7d916f636092137cb3"
-  ],
-  "files": [
-    "docs/adr/ADR-001-architecture.md",
-    "docs/architecture.mmd"
-  ],
-  "tests": [],
-  "reviews": [
-    "Revisión de límites arquitectónicos en el diagrama Mermaid y justificación de capas en el ADR"
-  ],
-  "prediction": "Esperaba que el ADR justificara la Alternativa B y que el diagrama mostrara las 4 capas sin dependencias directas entre UI e infraestructura",
-  "command": "cat docs/architecture.mmd",
-  "observedResult": "El diagrama incluye los tres perfiles y las capas correctamente estructuradas respetando la inversión de dependencias",
-  "explanation": "Definí la arquitectura por capas en el ADR y tracé las dependencias permitidas y responsabilidades futuras en el diagrama"
-},
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_3",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "studentId": "EduardoLezama",
+      "commitShas": ["026982c1b0c3b1f0b2926eb934da2ddd84231e2b"],
+      "files": ["src/domain/incidents/Incident.ts", "src/application/incidents/ListIncidents.ts", "src/application/incidents/GetIncidentDetail.ts", "src/infrastructure/incidents/InMemoryIncidentRepository.ts"],
+      "tests": ["npm run typecheck"],
+      "reviews": ["Revisé que el Fake se acoplara al contrato de dominio."],
+      "prediction": "Esperaba que los Use Cases funcionen retornando datos estáticos del Fake.",
+      "command": "npm run typecheck",
+      "observedResult": "El tipado confirma que los casos de uso consumen la interfaz abstracta.",
+      "explanation": "El núcleo de aplicación funciona independiente del UI."
+    },
+    {
+      "studentId": "MigueleArt",
+      "commitShas": ["835ad1cfbd4ea859f91b02874a050c51064a823e"],
+      "files": ["src/ui/incidents/IncidentListScreen.tsx", "src/ui/incidents/IncidentDetailScreen.tsx", "App.tsx", "course-tests/architecture-boundaries.test.ts"],
+      "tests": ["npm run test -- course-tests/architecture-boundaries.test.ts"],
+      "reviews": ["Revisé la inyección de dependencias en App.tsx."],
+      "prediction": "Esperaba que la UI pudiera renderizar los incidentes sin importar infraestructura directamente.",
+      "command": "npm run test:smoke",
+      "observedResult": "El smoke test sigue pasando a pesar del cambio estructural.",
+      "explanation": "La UI está implementada respetando los límites acordados (AC-03)."
     }
   ]
 }
