@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import type { Incident } from '../../../domain/incidents/Incident';
-import type { GetIncidentDetail } from '../../../application/incidents/GetIncidentDetail';
+import type { Incident } from '../../domain/incidents/Incident';
+import type { GetIncidentDetail } from '../../application/incidents/GetIncidentDetail';
 
 interface Props {
   getIncidentDetailUseCase: GetIncidentDetail;
@@ -15,12 +15,12 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
 
   useEffect(() => {
     let mounted = true;
-    getIncidentDetailUseCase.execute(incidentId).then((data) => {
+    getIncidentDetailUseCase.execute(incidentId).then((data: Incident | null) => {
       if (mounted) {
         setIncident(data);
         setLoading(false);
       }
-    }).catch(err => {
+    }).catch((err: unknown) => {
       console.error(err);
       if (mounted) setLoading(false);
     });

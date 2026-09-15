@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import type { Incident } from '../../../domain/incidents/Incident';
-import type { ListIncidents } from '../../../application/incidents/ListIncidents';
+import type { Incident } from '../../domain/incidents/Incident';
+import type { ListIncidents } from '../../application/incidents/ListIncidents';
 
 interface Props {
   listIncidentsUseCase: ListIncidents;
@@ -14,12 +14,12 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, onSe
 
   useEffect(() => {
     let mounted = true;
-    listIncidentsUseCase.execute().then((data) => {
+    listIncidentsUseCase.execute().then((data: readonly Incident[]) => {
       if (mounted) {
         setIncidents(data);
         setLoading(false);
       }
-    }).catch(err => {
+    }).catch((err: unknown) => {
       console.error(err);
       if (mounted) setLoading(false);
     });
