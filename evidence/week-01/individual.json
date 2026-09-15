@@ -1,41 +1,40 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Conserven exactamente tres integrantes y usen SHA Git completos de commits creados por cada persona.",
   "schemaVersion": 1,
   "week": 1,
-  "teamId": "REEMPLAZAR_CON_ID_DEL_EQUIPO",
+  "teamId": "equipo07",
   "members": [
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_1",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
+      "studentId": "Breyan21",
+      "commitShas": ["ce83cc4a643ac75c03e6a5e58879ccb9fcf332a3"],
+      "files": ["docs/problem-definition.md"],
       "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "reviews": ["Reviso la rama week-01-migueleart y confirmo que la linea base (App.tsx) y los documentos de definicion son coherentes con docs/CAMPUSOPS.md antes de integrar su aportacion de problem-definition.md."],
+      "prediction": "Esperaba que la definicion del problema quedara alineada con el caso del campus ficticio (docs/CAMPUSOPS.md): actores, flujo reportar-atender-cerrar y criterios de aceptacion observables.",
+      "command": "git diff origin/main origin/docs/problem-definition -- docs/problem-definition.md docs/risk-register.md",
+      "observedResult": "Se confirmo que problem-definition.md describe actores (reportante, tecnico, coordinador), el flujo principal y tres criterios de aceptacion verificables sin superar el alcance del caso.",
+      "explanation": "La aportacion define el problema y el alcance que CampusOps atiende, que sirve como base compartida para los entregables de las siguientes semanas."
     },
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_2",
+      "studentId": "MigueleArt",
+      "commitShas": ["43a1c2a463d3df48b6494d2cbb9edeefc4b02b90"],
+      "files": ["docs/problem-definition.md", "docs/risk-register.md", "App.tsx", "reports/week-01/baseline.json", "evidence/week-01/engineering.json"],
+      "tests": ["npm run test:smoke"],
+      "reviews": [],
+      "prediction": "Esperaba que al cambiar temporalmente el texto del titulo en App.tsx de 'CampusOps' a 'Campus Application', el smoke test fallara, porque la prueba busca el texto 'CampusOps' para comprobar la linea base. Tambien esperaba que tras revertir el cambio el mismo comando volviera a pasar.",
+      "command": "npm run test:smoke",
+      "observedResult": "El comando fallo con 'Unable to find an element with text: CampusOps' mientras el titulo estaba modificado; al restaurar 'CampusOps' en App.tsx el mismo comando paso con 'PASS course-tests/smoke.test.tsx'.",
+      "explanation": "La prueba verifica que la linea base se renderiza y que el backend llega a 'available'. El cambio del titulo altero el texto que la prueba busca, produciendo el sintoma; revertir la causa (restaurar 'CampusOps') hizo que reapareciera el elemento y el test pasara, lo que demostro la correccion sin modificar ninguna prueba."
+    },
+    {
+      "studentId": "EduardoLezama",
       "commitShas": ["772e2dd2ecef635e9c339d237666f7ef2948b2b2"],
       "files": ["docs/risk-register.md"],
-      "tests": [ "Revisión de que el documento contiene exactamente tres riesgos priorizados"],
-      "reviews": [],
-      "prediction": "Esperaba que el registro describiera tres riesgos concretos relacionados con CampusOps",
-      "command": "grep -R \"REEMPLAZAR\" docs/risk-register.md",
-      "observedResult": "No quedaron indicaciones pendientes en el archivo",
-      "explanation": "Completé el registro de riesgos y documenté cómo se comprobará cada mitigación"
-    },
-    {
-      "studentId": "REEMPLAZAR_INTEGRANTE_3",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
       "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "reviews": ["Reviso que el risk-register.md contuviera tres riesgos del caso CampusOps (operaciones offline, reasignacion concurrente, logs sensibles) con probabilidad, impacto, mitigacion y evidencia verificable antes de su aportacion."],
+      "prediction": "Esperaba que el registro de riesgos quedara alineado con el alcance minimo de CampusOps y priorizara el riesgo de perdida o duplicacion de operaciones offline por su impacto en la integridad de las incidencias.",
+      "command": "git diff origin/main origin/chore/evidencia-riesgos -- docs/risk-register.md",
+      "observedResult": "Se confirmo que risk-register.md contiene exactamente tres riesgos ordenados por prioridad, con probabilidad, impacto, mitigacion y evidencia observable, y justifica atender primero el riesgo de operaciones offline.",
+      "explanation": "La aportacion registra los riesgos del proyecto y prioriza la perdida de operaciones offline porque el modo sin conexion es parte del alcance minimo y su falla altera la integridad de las incidencias."
     }
   ]
 }

@@ -1,20 +1,25 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Comparen alternativas reales y relacionen la decisión con una comprobación ejecutada.",
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "REEMPLAZAR_CON_SHA_DEL_COMMIT_DE_CODIGO_Y_DOCUMENTOS",
-  "decision": "REEMPLAZAR_CON_LA_DECISION_DE_ALCANCE_RIESGO_O_ACEPTACION",
+  "commitSha": "ab396dc3ace91d50676f0ceb2e5adb9721f0d1a5",
+  "decision": "Decidimos verificar la linea base y documentar la falla controlada usando un solo comando reproducible existente, npm run test:smoke, y provocando la falla cambiando deliberadamente el titulo en App.tsx de 'CampusOps' a 'Campus Application'. Elegimos una falla de contenido reversible y detectable por la prueba existente (que busca el texto 'CampusOps') porque se ajusta a la restriccion de no modificar las pruebas y permite distinguir claramente sintoma (el mensaje 'Unable to find an element with text: CampusOps') de causa (el cambio del texto en App.tsx), lo que respalda el criterio de diagnostico de la rubrica.",
   "alternatives": [
-    "REEMPLAZAR_CON_PRIMERA_ALTERNATIVA_REAL",
-    "REEMPLAZAR_CON_SEGUNDA_ALTERNATIVA_REAL"
+    "Alternativa A: provocar la falla en src/api/courseBackend.ts cambiando el contrato esperado (por ejemplo, hacer que getBackendHealth rechace con 'Backend health contract mismatch' alterando la validacion). Esta opcion tambien es detectable por el smoke test, pero toca logica de red y de contrato, lo que mezcla el diagnostico de la linea base con el comportamiento remoto y es mas propenso a enmascarar el punto de fallo.",
+    "Alternativa B: provocar la falla en la configuracion, por ejemplo cambiando el DEFAULT_URL de courseBackend.ts. Esta opcion no se puede verificar de forma determinista con el smoke test porque la prueba hace mock de getBackendHealth, por lo que no expondria la falla y no permitiria demostrar la correccion con el mismo comando reproducible.",
+    "Alternativa C (elegida): cambiar el texto del titulo en App.tsx. Es un cambio de una linea, reversible, no afecta logica ni red, y es detectado de forma determinista por el smoke test existente al buscar el texto 'CampusOps'."
   ],
-  "tradeoff": "REEMPLAZAR_CON_EL_BENEFICIO_Y_EL_COSTO_DE_LA_DECISION",
+  "tradeoff": "Beneficio: obtuvimos una falla controlada determinista y reversible que se detecta y corrige con el mismo comando (npm run test:smoke), dejando evidencia reproducible del sintoma y de la causa sin tocar ninguna prueba. Costo/limitacion: la falla elegida es sencilla y no ejercita logica de negocio, por lo que su valor como diagnostico es principalmente pedagogico (distinguir sintoma de causa) y no prueba la robustez del codigo; ademas, dependemos de que el texto 'CampusOps' permanezca estable en la linea base para que la verificacion siga siendo util.",
   "requirementIds": ["AC-02", "AC-04"],
   "verification": [
     {
-      "command": "REEMPLAZAR_CON_COMANDO_EJECUTADO",
-      "result": "REEMPLAZAR_CON_RESULTADO_OBSERVADO",
-      "evidence": "REEMPLAZAR_CON_ARCHIVO_REPORTE_O_SALIDA_QUE_LO_DEMUESTRA"
+      "command": "npm run test:smoke",
+      "result": "El comando primero fallo con 'Unable to find an element with text: CampusOps' tras cambiar el titulo, y luego paso tras revertir App.tsx restaurando 'CampusOps'.",
+      "evidence": "Salida del comando npm run test:smoke en reports/week-01/baseline.json (observaciones falla-controlada y correccion-verificada) y el archivo App.tsx revertido a 'CampusOps' en el commit 52117e9."
+    },
+    {
+      "command": "npm run typecheck && npm run lint",
+      "result": "typecheck y lint no reportan errores con el proyecto en estado corregido.",
+      "evidence": "Salida de make verify en reports/week-01/baseline.json y el archivo App.tsx compilado correctamente en el commit 52117e9."
     }
   ]
 }

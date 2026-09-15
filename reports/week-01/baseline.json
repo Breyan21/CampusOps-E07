@@ -1,23 +1,22 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Los demás campos deben contener evidencia real y commitSha debe ser un SHA Git completo de 40 caracteres.",
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "REEMPLAZAR_CON_SHA_DEL_COMMIT_DE_CODIGO_Y_DOCUMENTOS",
-  "generatedAt": "REEMPLAZAR_CON_FECHA_HORA_ISO_8601",
+  "commitSha": "ab396dc3ace91d50676f0ceb2e5adb9721f0d1a5",
+  "generatedAt": "2026-09-06T21:32:50-06:00",
   "checks": [
     {
       "id": "falla-controlada",
       "status": "fail",
       "scenarioType": "failure",
       "command": "npm run test:smoke",
-      "evidence": "REEMPLAZAR_CON_SINTOMA_OBSERVADO_Y_CAUSA_IDENTIFICADA"
+      "evidence": "Sintoma: el smoke test fallo con 'Unable to find an element with text: CampusOps'. Detalle de la salida: jest reporto 'FAIL course-tests/smoke.test.tsx' y la asercion view.getByText('CampusOps') en la linea 15 de course-tests/smoke.test.tsx no encontro el elemento; el arbol renderizado mostraba el texto 'Campus Application' en lugar de 'CampusOps'. Causa: se modifico temporalmente el titulo en App.tsx cambiando <Text style={styles.title}>CampusOps</Text> por <Text style={styles.title}>Campus Application</Text>. Ese texto es el que la prueba busca para verificar la linea base, por lo que el cambio de contenido rompio la prueba. No se modifico ninguna prueba."
     },
     {
       "id": "correccion-verificada",
       "status": "pass",
       "scenarioType": "nominal",
       "command": "npm run test:smoke",
-      "evidence": "REEMPLAZAR_CON_RESULTADO_OBSERVABLE_DESPUES_DE_CORREGIR"
+      "evidence": "Tras revertir App.tsx y restaurar el texto 'CampusOps', el mismo comando 'npm run test:smoke' termino con 'PASS course-tests/smoke.test.tsx', 1 suite y 1 test aprobados, 0 fallos. El titulo 'CampusOps' se detecto nuevamente y el estado del backend llego a 'available'. Esto confirma que la causa fue corregida y el proyecto quedo en estado reproducible."
     }
   ]
 }
