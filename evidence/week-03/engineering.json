@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "commitSha": "47084c0b95328faa9885e9b144f6cefe7876bd04",
+  "decision": "Decidimos priorizar y atender en primer lugar la amenaza crítica TH-01 (alteración no autorizada de estados y asignaciones de incidencias, como el intento de un reportante de cerrar un reporte o de un técnico de modificar incidencias no asignadas), implementando un control de autorización estricta basada en roles (RBAC) y validación exhaustiva de la máquina de estados en las capas de aplicación/dominio y backend, desacoplada por completo de la interfaz de usuario, garantizando que ninguna transición de estado dependa de suposiciones de confianza en el cliente móvil.",
+  "alternatives": [
+    "Alternativa A: Restricción de permisos y transiciones de estado implementada exclusivamente en la capa de interfaz de usuario (React Native / Expo) mediante renderizado condicional y deshabilitación visual de botones según el rol del usuario activo. Esta alternativa fue descartada porque constituye seguridad por oscuridad: cualquier actor con herramientas de proxy o modificación de memoria en el cliente puede enviar peticiones directas a la API y eludir completamente el control visual.",
+    "Alternativa B (elegida): Control de autorización RBAC y máquina de estados formal implementados en la capa de Aplicación/Dominio (casos de uso) y respaldados contractualmente por el Backend. Cada caso de uso de mutación (ej. CerrarIncidencia, AsignarTecnico, ResolverIncidencia) valida explícitamente el rol del actor autenticado y la titularidad de la asignación antes de ejecutar o persistir cualquier cambio, rechazando transiciones no autorizadas con errores tipados de dominio (ForbiddenError / UnauthorizedTransitionError) independientemente de la fuente de la llamada."
+  ],
+  "tradeoff": "Beneficio: Se salvaguarda la integridad operativa irrestricta del ciclo de vida de las incidencias en CampusOps, eliminando de raíz vectores de elevación de privilegios horizontal y vertical, y permitiendo probar de forma determinista y unitaria las reglas de seguridad sin depender del renderizado de componentes visuales. Costo: Introduce mayor sobrecarga de desarrollo inicial al requerir la formalización de casos de uso específicos con verificación de invariantes, definición de tipos de error de autorización y manejo explícito de excepciones tanto en el backend como en la experiencia de usuario y colas de sincronización offline.",
+  "requirementIds": [
+    "AC-02",
+    "AC-04"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "result": "El suite de pruebas públicas de la semana 3 aprueba exitosamente, validando que el modelo de amenazas enlaza los activos, amenazas, controles y verificaciones requeridas.",
+      "evidence": "Ejecución exitosa de Jest sobre course-tests/public/week-03.test.ts con el test 'threat model links assets, threats, controls and verification' en estado PASS."
+    },
+    {
+      "command": "python tools/course_public_evaluator.py --week 3 --mode public",
+      "result": "El evaluador público de la semana 3 verifica la integridad estructural de los documentos obligatorios (docs/threat-model.md y evidence/week-03/engineering.json) y el paso de los checks de la semana.",
+      "evidence": "Salida en formato JSON del evaluador con checks base_files, react_native_profile, workflow_integrity, secret_scan y required_evidence en status pass."
+    }
+  ]
+}

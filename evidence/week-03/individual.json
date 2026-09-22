@@ -21,15 +21,22 @@
 		  "explanation": "Descompresión del entorno de la semana 3, integración del workflow de GitHub Actions para CI/CD con búsqueda de secretos, resolución de dependencias y ejecución de pruebas de entorno asegurando el cumplimiento de AC-01"
 		},
 		{
-		  "studentId": "",
-		  "commitShas": [""],
-		  "files": [],
-		  "tests": [],
-		  "reviews": [""],
-		  "prediction": "",
-		  "command": "",
-		  "observedResult": "",
-		  "explanation": ""
+		  "studentId": "Breyan21",
+		  "commitShas": ["47084c0b95328faa9885e9b144f6cefe7876bd04"],
+		  "files": [
+		    "docs/threat-model.md",
+		    "evidence/week-03/engineering.json"
+		  ],
+		  "tests": [
+		    "npm test -- course-tests/public/week-03.test.ts"
+		  ],
+		  "reviews": [
+		    "Revisión del diseño arquitectónico del modelo de amenazas y definición de fronteras de confianza y controles RBAC para CampusOps"
+		  ],
+		  "prediction": "Esperaba que docs/threat-model.md estructurara las fronteras de confianza y los activos críticos (sesiones, asignaciones, fotos) vinculando amenazas con controles verificables, y que el test público week-03.test.ts validara la presencia de los conceptos obligatorios (activo, amenaza, control, verificación).",
+		  "command": "npm test -- course-tests/public/week-03.test.ts",
+		  "observedResult": "La prueba 'threat model links assets, threats, controls and verification' pasa exitosamente, confirmando los vínculos entre activos, amenazas, controles y verificación en docs/threat-model.md.",
+		  "explanation": "Diseño del modelo de amenazas formal bajo metodología STRIDE, delimitando fronteras de confianza, activos sensibles y priorizando el riesgo de alteración de estado no autorizada (AC-02 y AC-04). Justificación técnica en engineering.json evaluando alternativas de control RBAC y sus trade-offs."
 		},
         {
 		  "studentId": "",
