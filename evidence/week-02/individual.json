@@ -15,7 +15,7 @@
       "explanation": "Definí la arquitectura por capas en el ADR y tracé las dependencias permitidas y responsabilidades futuras en el diagrama"
     },
     {
-      "studentId": "EduardoLezama",
+      "studentId": "Laloaobes",
       "commitShas": ["026982c1b0c3b1f0b2926eb934da2ddd84231e2b"],
       "files": ["src/domain/incidents/Incident.ts", "src/application/incidents/ListIncidents.ts", "src/application/incidents/GetIncidentDetail.ts", "src/infrastructure/incidents/InMemoryIncidentRepository.ts"],
       "tests": ["npm run typecheck"],

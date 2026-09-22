@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "teamId": "equipo07",
+  "members": [
+		{
+		  "studentId": "Laloaobes",
+		  "commitShas": ["ea47d00ad61a55585a4e53de43afaf6a1f9f9a30"],
+		  "files": [
+                ".github/workflows/week-03-ci-amenazas-feedback.yml",
+				"Makefile",
+				"package.json"],
+		  "tests": [
+                "Verificación de Github Actions",
+				"AC-01"
+            ],
+		  "reviews": ["Integración del entorno semana 3"],
+		  "prediction": "Esperaba que al integrar el workflow proporcionado e instalar las dependencias, el comando make feedback y verify-week-03 pasaran correctamente en el entorno local confirmando la integridad del CI/CD antes de subir los cambios",
+		  "command": "make public-test-week-03",
+		  "observedResult": "Los comandos locales verificaron correctamente las reglas de integridad, y el entorno quedó configurado para que el workflow en GitHub Actions ejecute la generación del paquete Android, typecheck y escaneo de secretos exitosamente",
+		  "explanation": "Descompresión del entorno de la semana 3, integración del workflow de GitHub Actions para CI/CD con búsqueda de secretos, resolución de dependencias y ejecución de pruebas de entorno asegurando el cumplimiento de AC-01"
+		},
+		{
+		  "studentId": "",
+		  "commitShas": [""],
+		  "files": [],
+		  "tests": [],
+		  "reviews": [""],
+		  "prediction": "",
+		  "command": "",
+		  "observedResult": "",
+		  "explanation": ""
+		},
+        {
+		  "studentId": "",
+		  "commitShas": [""],
+		  "files": [],
+		  "tests": [],
+		  "reviews": [""],
+		  "prediction": "",
+		  "command": "",
+		  "observedResult": "",
+		  "explanation": ""
+		}
+	]
+}

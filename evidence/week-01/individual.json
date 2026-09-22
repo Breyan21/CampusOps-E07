@@ -26,7 +26,7 @@
       "explanation": "La prueba verifica que la linea base se renderiza y que el backend llega a 'available'. El cambio del titulo altero el texto que la prueba busca, produciendo el sintoma; revertir la causa (restaurar 'CampusOps') hizo que reapareciera el elemento y el test pasara, lo que demostro la correccion sin modificar ninguna prueba."
     },
     {
-      "studentId": "EduardoLezama",
+      "studentId": "Laloaobes",
       "commitShas": ["772e2dd2ecef635e9c339d237666f7ef2948b2b2"],
       "files": ["docs/risk-register.md"],
       "tests": [],
