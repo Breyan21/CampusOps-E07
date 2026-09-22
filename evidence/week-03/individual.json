@@ -39,15 +39,15 @@
 		  "explanation": "Diseño del modelo de amenazas formal bajo metodología STRIDE, delimitando fronteras de confianza, activos sensibles y priorizando el riesgo de alteración de estado no autorizada (AC-02 y AC-04). Justificación técnica en engineering.json evaluando alternativas de control RBAC y sus trade-offs."
 		},
         {
-		  "studentId": "",
-		  "commitShas": [""],
-		  "files": [],
-		  "tests": [],
-		  "reviews": [""],
-		  "prediction": "",
-		  "command": "",
-		  "observedResult": "",
-		  "explanation": ""
+		  "studentId": "Integrante3-FallasControles",
+		  "commitShas": ["9afc9fac2e589deec4c304b066280cfef25493e6"],
+		  "files": ["reports/week-03/security.json"],
+		  "tests": ["npm test -- course-tests/public/week-03.test.ts"],
+		  "reviews": ["Prueba de concepto de fallo y recuperación"],
+		  "prediction": "Al introducir intencionalmente una violación de seguridad modificando la estructura requerida del modelo de amenazas, esperaba que la prueba 'threat model links assets, threats, controls and verification' fallara, demostrando que el entorno detecta omisiones en los controles. Al revertirlo, todo debería pasar de nuevo.",
+		  "command": "make public-test-week-03",
+		  "observedResult": "El test público detectó el fallo correctamente al remover una palabra clave del threat model. Al revertirlo, los tests pasaron exitosamente. Todo se documentó en reports/week-03/security.json.",
+		  "explanation": "Validé el entorno de ejecución asegurándome de que detecta violaciones en las reglas de seguridad requeridas y completé el requerimiento AC-03 consolidando la evidencia."
 		}
 	]
 }

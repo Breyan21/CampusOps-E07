@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "commitSha": "9afc9fac2e589deec4c304b066280cfef25493e6",
+  "generatedAt": "2026-09-21T20:36:00Z",
+  "checks": [
+    {
+      "id": "security-validation-failure",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-03.test.ts",
+      "evidence": "FAIL course-tests/public/week-03.test.ts\n  √ feedback workflow preserves critical checks and least privilege\n  x threat model links assets, threats, controls and verification\n\n  ● threat model links assets, threats, controls and verification\n\n    expect(received).toContain(expected) // indexOf\n\n    Expected substring: \"activo\""
+    },
+    {
+      "id": "security-validation-nominal",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-03.test.ts",
+      "evidence": "PASS course-tests/public/week-03.test.ts\n  √ feedback workflow preserves critical checks and least privilege (6 ms)\n  √ threat model links assets, threats, controls and verification (2 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total"
+    }
+  ]
+}
