@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "week": 3,
+  "week": 2,
   "mode": "evidence",
   "commitSha": "8e4677769996a0e67bfe6e5566bd892351118cbd",
-  "evaluatedAt": "2026-09-22T02:37:50.167167+00:00",
-  "status": "fail",
+  "evaluatedAt": "2026-09-15T05:39:42.535685+00:00",
+  "status": "pass",
   "checks": [
     {
       "id": "base_files",
@@ -37,24 +37,24 @@
       "detail": "missing/empty=[]"
     },
     {
-      "id": "schema:reports/week-03/security.json",
+      "id": "schema:reports/week-02/dependencies.json",
       "status": "pass",
-      "detail": "2 checks indexed, 1 boundary/failure; report evaluates HEAD"
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "schema:evidence/week-03/engineering.json",
+      "id": "schema:evidence/week-02/engineering.json",
       "status": "pass",
-      "detail": "decision evidence is substantive and reproducible; report evaluates HEAD"
+      "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "schema:evidence/week-03/individual.json",
+      "id": "schema:evidence/week-02/individual.json",
       "status": "pass",
       "detail": "three individual evidence records found"
     },
     {
       "id": "frozen_sha",
-      "status": "fail",
-      "detail": "tag=week-03-final tagSha=fatal: ambiguous argument 'week-03-final': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]' head=9afc9fac2e589deec4c304b066280cfef25493e6"
+      "status": "pass",
+      "detail": "tag=week-02-final tagSha=e3e9b136daffb7fe999d969c8bb0f331896e8e25 head=e3e9b136daffb7fe999d969c8bb0f331896e8e25"
     }
   ]
 }
