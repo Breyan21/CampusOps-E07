@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "week": 3,
   "mode": "evidence",
-  "commitSha": "8e4677769996a0e67bfe6e5566bd892351118cbd",
-  "evaluatedAt": "2026-09-22T02:37:50.167167+00:00",
+  "commitSha": "dab8c87b335663214c40bcabb0c1b1a7fc6abbc9",
+  "evaluatedAt": "2026-09-22T03:11:43.674040+00:00",
   "status": "fail",
   "checks": [
     {
@@ -39,12 +39,12 @@
     {
       "id": "schema:reports/week-03/security.json",
       "status": "pass",
-      "detail": "2 checks indexed, 1 boundary/failure; report evaluates HEAD"
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
     },
     {
       "id": "schema:evidence/week-03/engineering.json",
       "status": "pass",
-      "detail": "decision evidence is substantive and reproducible; report evaluates HEAD"
+      "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
     },
     {
       "id": "schema:evidence/week-03/individual.json",
@@ -54,7 +54,7 @@
     {
       "id": "frozen_sha",
       "status": "fail",
-      "detail": "tag=week-03-final tagSha=fatal: ambiguous argument 'week-03-final': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]' head=9afc9fac2e589deec4c304b066280cfef25493e6"
+      "detail": "tag=week-03-final tagSha=fatal: ambiguous argument 'week-03-final': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]' head=dab8c87b335663214c40bcabb0c1b1a7fc6abbc9"
     }
   ]
 }

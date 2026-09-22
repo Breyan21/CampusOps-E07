@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "8e4677769996a0e67bfe6e5566bd892351118cbd",
+  "commitSha": "dab8c87b335663214c40bcabb0c1b1a7fc6abbc9",
   "decision": "Decidimos implementar una arquitectura de 4 capas: UI -> Aplicación -> Dominio <- Infraestructura para desacoplar el origen de los datos de la presentación, cumpliendo con AC-01 y AC-03.",
   "alternatives": [
     "Alternativa A: Que los componentes UI consuman directamente la infraestructura (repositorio o HTTP). Es más rápido de programar, pero acopla el código visual con las reglas de datos, volviéndolo difícil de testear y de cambiar en el futuro sin modificar pantallas.",

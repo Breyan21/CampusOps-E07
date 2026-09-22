@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "week": 3,
   "mode": "public",
-  "commitSha": "8e4677769996a0e67bfe6e5566bd892351118cbd",
-  "evaluatedAt": "2026-09-22T02:37:39.617930+00:00",
+  "commitSha": "dab8c87b335663214c40bcabb0c1b1a7fc6abbc9",
+  "evaluatedAt": "2026-09-22T03:12:38.470476+00:00",
   "status": "pass",
   "checks": [
     {
@@ -69,7 +69,7 @@
     {
       "id": "toolchain_4",
       "status": "pass",
-      "detail": "npm test -- --ci --runInBand course-tests/public/week-03.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-03.test.ts\n\n\nPASS course-tests/public/week-03.test.ts\n  âˆš feedback workflow preserves critical checks and least privilege (7 ms)\n  âˆš threat model links assets, threats, controls and verification (1 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total\nSnapshots:   0 total\nTime:        1.644 s, estimated 2 s\nRan all test suites matching /course-tests\\\\public\\\\week-03.test.ts/i."
+      "detail": "npm test -- --ci --runInBand course-tests/public/week-03.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-03.test.ts\n\n\nPASS course-tests/public/week-03.test.ts\n  âˆš feedback workflow preserves critical checks and least privilege (9 ms)\n  âˆš threat model links assets, threats, controls and verification (2 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total\nSnapshots:   0 total\nTime:        1.756 s, estimated 2 s\nRan all test suites matching /course-tests\\\\public\\\\week-03.test.ts/i."
     }
   ]
 }
