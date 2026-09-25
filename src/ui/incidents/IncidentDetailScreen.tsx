@@ -20,8 +20,8 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
         setIncident(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch((_err: unknown) => {
+      console.error('Error al cargar detalle de incidencia: error controlado sin exposición de datos.');
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };

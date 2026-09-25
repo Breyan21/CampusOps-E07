@@ -19,8 +19,8 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, onSe
         setIncidents(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch((_err: unknown) => {
+      console.error('Error al consultar lista de incidencias: error controlado sin exposición de datos.');
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };
