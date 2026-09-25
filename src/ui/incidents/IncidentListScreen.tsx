@@ -19,8 +19,8 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, onSe
         setIncidents(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch(() => {
+      console.error('No fue posible cargar las incidencias.');
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };

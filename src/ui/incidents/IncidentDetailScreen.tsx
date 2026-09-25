@@ -20,8 +20,8 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
         setIncident(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch(() => {
+      console.error('No fue posible cargar el detalle de la incidencia.');
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };

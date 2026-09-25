@@ -1,4 +1,6 @@
 // Public, in-memory teaching fixture. Never deploy as institutional authentication.
+import { FIXTURE_ACCESS_TOKEN, FIXTURE_REFRESH_TOKEN } from './fixtures.mjs';
+
 const actors = {
   'reporter-1': 'reporter', 'reporter-2': 'reporter',
   'technician-1': 'technician', 'technician-2': 'technician',
@@ -27,10 +29,10 @@ export async function handleCampusOps(request, response, url, { send, readJson, 
   if (request.method === 'POST' && url.pathname === '/v1/session/login') {
     const input = await readJson(request).catch(() => null);
     if (!input || !Object.hasOwn(actors, input.actorId)) return send(response, 401, { code: 'unknown_fixture_actor' });
-    return send(response, 200, { actorId: input.actorId, role: actors[input.actorId], accessToken: 'course-valid-token', refreshToken: 'course-refresh-0', expiresIn: 60 });
+    return send(response, 200, { actorId: input.actorId, role: actors[input.actorId], accessToken: FIXTURE_ACCESS_TOKEN, refreshToken: FIXTURE_REFRESH_TOKEN, expiresIn: 60 });
   }
   const actorId = request.headers['x-course-actor'];
-  if (request.headers.authorization !== 'Bearer course-valid-token' || !Object.hasOwn(actors, actorId)) {
+  if (request.headers.authorization !== `Bearer ${FIXTURE_ACCESS_TOKEN}` || !Object.hasOwn(actors, actorId)) {
     return send(response, 401, { code: 'unauthorized' });
   }
   const role = actors[actorId];
