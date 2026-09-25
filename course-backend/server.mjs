@@ -9,7 +9,7 @@ const completedOperations = new Map();
 function send(response, status, body, headers = {}) {
   const value = typeof body === 'string' ? body : JSON.stringify(body);
   response.writeHead(status, {
-    'access-control-allow-origin': '*',
+    'access-control-allow-origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8081',
     'content-type': typeof body === 'string' ? 'application/json' : 'application/json; charset=utf-8',
     ...headers,
   });
