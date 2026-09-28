@@ -5,7 +5,7 @@
   "members": [
     {
       "studentId": "Laloaobes",
-      "commitShas": ["REEMPLAZAR_POR_SHA_FINAL"],
+      "commitShas": ["b3d87c4827b86c75d75a0d967a36bc01462ef877"],
       "files": [
         "src/infrastructure/storage/SecureStorageService.ts",
         "src/api/courseBackend.ts",
