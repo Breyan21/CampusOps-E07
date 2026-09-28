@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "REEMPLAZAR_POR_SHA_FINAL",
+  "decision": "Selección de expo-secure-store para tokens y sesión, protegiendo credenciales en reposo.",
+  "alternatives": [
+    "AsyncStorage con cifrado por software (vulnerable a ingeniería inversa)",
+    "SQLCipher/MMKV cifrado (sobrecarga innecesaria para claves simples)"
+  ],
+  "tradeoff": "Beneficio: Protección física de hardware. Costo: Ligera latencia asíncrona y límite de tamaño por clave (2KB).",
+  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/security-audit.test.ts",
+      "result": "pass",
+      "evidence": "Jest: 1 suite y 7 pruebas en PASS. Se valida la no persistencia en caché: saveToken guarda en SecureStore (Keystore/Keychain) con keychainAccessible WHEN_UNLOCKED_THIS_DEVICE_ONLY, sin respaldo fuera del dispositivo; tras removeToken se invoca deleteItemAsync y getToken devuelve null, sin sesión en reposo; ante fallos del almacén, console.error no contiene el token ni la clave. En red, ECONNREFUSED, abort/ETIMEDOUT y HTTP 500 se convierten en BackendUnavailableError con el mensaje 'Error de conexión', y ni el mensaje ni los logs contienen 127.0.0.1, el puerto 4310, /health, rutas del servidor ni líneas de stack trace."
+    },
+    {
+      "command": "npm run typecheck",
+      "result": "pass",
+      "evidence": "tsc --noEmit terminó con código 0 tras agregar src/infrastructure/storage/SecureStorageService.ts y el wrapper seguro de src/api/courseBackend.ts."
+    }
+  ]
+}

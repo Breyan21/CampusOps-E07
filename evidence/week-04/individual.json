@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "teamId": "equipo07",
+  "members": [
+    {
+      "studentId": "Laloaobes",
+      "commitShas": ["REEMPLAZAR_POR_SHA_FINAL"],
+      "files": [
+        "src/infrastructure/storage/SecureStorageService.ts",
+        "src/api/courseBackend.ts",
+        "docs/security-controls.md"
+      ],
+      "tests": ["course-tests/security-audit.test.ts (validación de errores HTTP sanitizados)"],
+      "reviews": ["Revisión manual de logs en consola para evitar fugas de infraestructura"],
+      "prediction": "Los tokens quedarán encriptados por el SO nativo y los fallos de red se mostrarán inofensivos.",
+      "command": "npm run typecheck && npm test -- course-tests/security-audit.test.ts",
+      "observedResult": "Typecheck sin errores y 7/7 pruebas de security-audit en PASS. Cero stack traces, URLs o puertos expuestos en mensajes y logs.",
+      "explanation": "Implementé expo-secure-store para credenciales y un wrapper seguro para la API."
+    }
+  ]
+}
