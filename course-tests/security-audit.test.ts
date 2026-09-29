@@ -1,3 +1,4 @@
+import { redactForTelemetry } from '../src/course-evaluation/index';
 import * as SecureStore from 'expo-secure-store';
 
 import {
@@ -102,5 +103,33 @@ describe('courseBackend sanitiza errores de red (TH-04)', () => {
     await expectSanitizedFailure();
     expect(loggedText()).toContain('HTTP 500');
     expect(loggedText()).not.toContain('/srv/');
+  });
+});
+
+describe('redactForTelemetry (Sanitización)', () => {
+  test('maneja null y tipos primitivos', () => {
+    expect(redactForTelemetry(null)).toBeNull();
+    expect(redactForTelemetry(123)).toBe(123);
+    expect(redactForTelemetry('string')).toBe('string');
+  });
+
+  test('sanitiza claves sensibles en objetos planos', () => {
+    const input = { password: '123', displayName: 'John', safe: 'yes' };
+    expect(redactForTelemetry(input)).toEqual({ password: '[REDACTED]', displayName: '[REDACTED]', safe: 'yes' });
+  });
+
+  test('sanitiza claves sensibles ignorando mayúsculas y guiones', () => {
+    const input = { 'Pass-Word': '123', 'user_id': '456', Email: 'a@a.com' };
+    expect(redactForTelemetry(input)).toEqual({ 'Pass-Word': '[REDACTED]', 'user_id': '[REDACTED]', Email: '[REDACTED]' });
+  });
+
+  test('sanitiza estructuras anidadas complejas', () => {
+    const input = { data: { token: 'secret', inner: { latitude: '10' } } };
+    expect(redactForTelemetry(input)).toEqual({ data: { token: '[REDACTED]', inner: { latitude: '[REDACTED]' } } });
+  });
+
+  test('sanitiza matrices y entradas dentro de matrices', () => {
+    const input = [{ token: 'abc' }, 'string', null, { safe: 'yes', evidence: 'file.png' }];
+    expect(redactForTelemetry(input)).toEqual([{ token: '[REDACTED]' }, 'string', null, { safe: 'yes', evidence: '[REDACTED]' }]);
   });
 });
