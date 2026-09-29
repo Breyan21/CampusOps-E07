@@ -22,6 +22,15 @@ Controles implementados para las amenazas **TH-03** (secuestro de sesión) y **T
 - La interfaz solo muestra el estado `offline`.
 - Verificación: `course-tests/security-audit.test.ts` comprueba que ni el mensaje ni los logs contienen `127.0.0.1`, el puerto, `/health`, `ECONNREFUSED`, `ETIMEDOUT` ni líneas de stack.
 
+## Sanitización de registros y telemetría
+
+- `redactForTelemetry` genera una copia recursiva de objetos y arreglos; no muta la entrada recibida por la aplicación.
+- Normaliza campos a minúsculas y elimina `_` y `-`; por ello, `accessToken`, `access_token` y `ACCESS-TOKEN` reciben el mismo tratamiento.
+- Sustituye por `[REDACTED]` credenciales, identidad, ubicación, fotografías, evidencias, comentarios internos e historial de asignaciones. Conserva contexto técnico como `incidentId`, `correlationId`, `status`, `attempt` y `durationMs`.
+- `IncidentListScreen` e `IncidentDetailScreen` no registran objetos `Error`. Emiten eventos de categoría estable mediante `src/telemetry/safeTelemetry.ts`, que sanitiza sus metadatos antes de usar `console.info`.
+- `courseBackend` tampoco registra respuestas ni errores originales: solo conserva tipo de falla y, cuando existe, código HTTP. Así no filtra URL, puerto, ruta o stack trace.
+- Verificación: `npm test -- --ci --runInBand course-tests/public/week-04.test.ts` comprueba datos anidados sensibles y `npm run typecheck` valida la integración tipada.
+
 ## Riesgo Residual
 
 - **Dispositivos rooteados o con jailbreak:** un atacante con privilegios de root puede consultar el Keystore o Keychain desde el propio proceso de la app mientras el dispositivo está desbloqueado. `expo-secure-store` protege los datos en reposo, pero no ante un sistema operativo comprometido.
