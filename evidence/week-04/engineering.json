@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 4,
-  "commitSha": "837d5386ca8a596f74f4d2d8d69441a3d19218bc",
+  "commitSha": "2b720bad514f96ab3c5d06be61771aa6da488ac8",
   "decision": "Selección de expo-secure-store para tokens y sesión, protegiendo credenciales en reposo.",
   "alternatives": [
     "AsyncStorage con cifrado por software (vulnerable a ingeniería inversa)",
