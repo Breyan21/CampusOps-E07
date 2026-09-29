@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "969c9f90f7aea97b7b4feb939e69d47d4d7977e0",
+  "generatedAt": "2026-09-29T03:47:48Z",
+  "checks": [
+    {
+      "id": "negative-tests-failure",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/security-audit.test.ts",
+      "evidence": "\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/security-audit.test.ts\n\n\nFAIL course-tests/security-audit.test.ts\n  SecureStorageService (TH-03)\n    âˆš guarda el token en SecureStore sin respaldo fuera del dispositivo (6 ms)\n    âˆš si falla el guardado no registra la clave ni el valor (2 ms)\n    âˆš si falla la lectura devuelve null sin exponer datos (1 ms)\n    âˆš removeToken elimina el token para que no quede sesiÃ³n en reposo (2 ms)\n  courseBackend sanitiza errores de red (TH-04)\n    âˆš ECONNREFUSED se convierte en \"Error de conexiÃ³n\" (3 ms)\n    âˆš ETIMEDOUT / abort se convierte en \"Error de conexiÃ³n\" (2 ms)\n    âˆš HTTP 500 no expone el cuerpo ni la ruta del servidor (2 ms)\n  redactForTelemetry (SanitizaciÃ³n)\n    âˆš maneja null y tipos primitivos (1 ms)\n    Ã— sanitiza claves sensibles en objetos planos (6 ms)\n    Ã— sanitiza claves sensibles ignorando mayÃºsculas y guiones (1 ms)\n    Ã— sanitiza estruct"
+    },
+    {
+      "id": "negative-tests-nominal",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/security-audit.test.ts",
+      "evidence": "\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/security-audit.test.ts\n\n\nPASS course-tests/security-audit.test.ts\n  SecureStorageService (TH-03)\n    âˆš guarda el token en SecureStore sin respaldo fuera del dispositivo (5 ms)\n    âˆš si falla el guardado no registra la clave ni el valor (2 ms)\n    âˆš si falla la lectura devuelve null sin exponer datos (1 ms)\n    âˆš removeToken elimina el token para que no quede sesiÃ³n en reposo (1 ms)\n  courseBackend sanitiza errores de red (TH-04)\n    âˆš ECONNREFUSED se convierte en \"Error de conexiÃ³n\" (4 ms)\n    âˆš ETIMEDOUT / abort se convierte en \"Error de conexiÃ³n\" (2 ms)\n    âˆš HTTP 500 no expone el cuerpo ni la ruta del servidor (1 ms)\n  redactForTelemetry (SanitizaciÃ³n)\n    âˆš maneja null y tipos primitivos (1 ms)\n    âˆš sanitiza claves sensibles en objetos planos (1 ms)\n    âˆš sanitiza claves sensibles ignorando mayÃºsculas y guiones\n    âˆš sanitiza estructuras"
+    }
+  ]
+}

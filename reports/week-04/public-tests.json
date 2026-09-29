@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "week": 3,
-  "mode": "verify",
-  "commitSha": "e00daf084ab4e9cc4b7fbab194c19ca3345bee92",
-  "evaluatedAt": "2026-09-22T03:11:05.178902+00:00",
+  "week": 4,
+  "mode": "public",
+  "commitSha": "97e45d1a8ebc7895fe3f18acceca3ec8692d279a",
+  "evaluatedAt": "2026-09-29T04:09:27.818743+00:00",
   "status": "pass",
   "checks": [
     {
@@ -32,6 +32,31 @@
       "detail": "hits=[]"
     },
     {
+      "id": "required_evidence",
+      "status": "pass",
+      "detail": "missing/empty=[]"
+    },
+    {
+      "id": "schema:reports/week-04/secret-scan.json",
+      "status": "pass",
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
+    },
+    {
+      "id": "schema:reports/week-04/negative-tests.json",
+      "status": "pass",
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
+    },
+    {
+      "id": "schema:evidence/week-04/engineering.json",
+      "status": "pass",
+      "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
+    },
+    {
+      "id": "schema:evidence/week-04/individual.json",
+      "status": "pass",
+      "detail": "three individual evidence records found"
+    },
+    {
       "id": "toolchain_1",
       "status": "pass",
       "detail": "npm run typecheck\n> dmi-react-native-starter@1.0.0 typecheck\n> tsc --noEmit"
@@ -49,7 +74,7 @@
     {
       "id": "toolchain_4",
       "status": "pass",
-      "detail": "npm run test:smoke\n> dmi-react-native-starter@1.0.0 test:smoke\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/smoke.test.tsx\n\n\nPASS course-tests/smoke.test.tsx\n  âˆš renders the reproducible baseline and resolves backend state (875 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       1 passed, 1 total\nSnapshots:   0 total\nTime:        3.177 s\nRan all test suites matching /course-tests\\\\smoke.test.tsx/i."
+      "detail": "npm test -- --ci --runInBand course-tests/public/week-04.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-04.test.ts\n\n\nPASS course-tests/public/week-04.test.ts\n  âˆš CampusOps redacts personal and incident-sensitive data while preserving technical context (6 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       1 passed, 1 total\nSnapshots:   0 total\nTime:        2.018 s, estimated 4 s\nRan all test suites matching /course-tests\\\\public\\\\week-04.test.ts/i."
     }
   ]
 }

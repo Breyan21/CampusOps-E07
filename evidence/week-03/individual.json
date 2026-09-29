@@ -3,51 +3,66 @@
   "week": 3,
   "teamId": "equipo07",
   "members": [
-		{
-		  "studentId": "Laloaobes",
-		  "commitShas": ["ea47d00ad61a55585a4e53de43afaf6a1f9f9a30"],
-		  "files": [
-                ".github/workflows/week-03-ci-amenazas-feedback.yml",
-				"Makefile",
-				"package.json"],
-		  "tests": [
-                "Verificación de Github Actions",
-				"AC-01"
-            ],
-		  "reviews": ["Integración del entorno semana 3"],
-		  "prediction": "Esperaba que al integrar el workflow proporcionado e instalar las dependencias, el comando make feedback y verify-week-03 pasaran correctamente en el entorno local confirmando la integridad del CI/CD antes de subir los cambios",
-		  "command": "make public-test-week-03",
-		  "observedResult": "Los comandos locales verificaron correctamente las reglas de integridad, y el entorno quedó configurado para que el workflow en GitHub Actions ejecute la generación del paquete Android, typecheck y escaneo de secretos exitosamente",
-		  "explanation": "Descompresión del entorno de la semana 3, integración del workflow de GitHub Actions para CI/CD con búsqueda de secretos, resolución de dependencias y ejecución de pruebas de entorno asegurando el cumplimiento de AC-01"
-		},
-		{
-		  "studentId": "Breyan21",
-		  "commitShas": ["47084c0b95328faa9885e9b144f6cefe7876bd04"],
-		  "files": [
-		    "docs/threat-model.md",
-		    "evidence/week-03/engineering.json"
-		  ],
-		  "tests": [
-		    "npm test -- course-tests/public/week-03.test.ts"
-		  ],
-		  "reviews": [
-		    "Revisión del diseño arquitectónico del modelo de amenazas y definición de fronteras de confianza y controles RBAC para CampusOps"
-		  ],
-		  "prediction": "Esperaba que docs/threat-model.md estructurara las fronteras de confianza y los activos críticos (sesiones, asignaciones, fotos) vinculando amenazas con controles verificables, y que el test público week-03.test.ts validara la presencia de los conceptos obligatorios (activo, amenaza, control, verificación).",
-		  "command": "npm test -- course-tests/public/week-03.test.ts",
-		  "observedResult": "La prueba 'threat model links assets, threats, controls and verification' pasa exitosamente, confirmando los vínculos entre activos, amenazas, controles y verificación en docs/threat-model.md.",
-		  "explanation": "Diseño del modelo de amenazas formal bajo metodología STRIDE, delimitando fronteras de confianza, activos sensibles y priorizando el riesgo de alteración de estado no autorizada (AC-02 y AC-04). Justificación técnica en engineering.json evaluando alternativas de control RBAC y sus trade-offs."
-		},
-        {
-		  "studentId": "Integrante3-FallasControles",
-		  "commitShas": ["9afc9fac2e589deec4c304b066280cfef25493e6"],
-		  "files": ["reports/week-03/security.json"],
-		  "tests": ["npm test -- course-tests/public/week-03.test.ts"],
-		  "reviews": ["Prueba de concepto de fallo y recuperación"],
-		  "prediction": "Al introducir intencionalmente una violación de seguridad modificando la estructura requerida del modelo de amenazas, esperaba que la prueba 'threat model links assets, threats, controls and verification' fallara, demostrando que el entorno detecta omisiones en los controles. Al revertirlo, todo debería pasar de nuevo.",
-		  "command": "make public-test-week-03",
-		  "observedResult": "El test público detectó el fallo correctamente al remover una palabra clave del threat model. Al revertirlo, los tests pasaron exitosamente. Todo se documentó en reports/week-03/security.json.",
-		  "explanation": "Validé el entorno de ejecución asegurándome de que detecta violaciones en las reglas de seguridad requeridas y completé el requerimiento AC-03 consolidando la evidencia."
-		}
-	]
+    {
+      "studentId": "Laloaobes",
+      "commitShas": [
+        "ea47d00ad61a55585a4e53de43afaf6a1f9f9a30"
+      ],
+      "files": [
+        ".github/workflows/week-03-ci-amenazas-feedback.yml",
+        "Makefile",
+        "package.json"
+      ],
+      "tests": [
+        "Verificación de Github Actions",
+        "AC-01"
+      ],
+      "reviews": [
+        "Integración del entorno semana 3"
+      ],
+      "prediction": "Esperaba que al integrar el workflow proporcionado e instalar las dependencias, el comando make feedback y verify-week-03 pasaran correctamente en el entorno local confirmando la integridad del CI/CD antes de subir los cambios",
+      "command": "make public-test-week-03",
+      "observedResult": "Los comandos locales verificaron correctamente las reglas de integridad, y el entorno quedó configurado para que el workflow en GitHub Actions ejecute la generación del paquete Android, typecheck y escaneo de secretos exitosamente",
+      "explanation": "Descompresión del entorno de la semana 3, integración del workflow de GitHub Actions para CI/CD con búsqueda de secretos, resolución de dependencias y ejecución de pruebas de entorno asegurando el cumplimiento de AC-01"
+    },
+    {
+      "studentId": "Breyan21",
+      "commitShas": [
+        "47084c0b95328faa9885e9b144f6cefe7876bd04"
+      ],
+      "files": [
+        "docs/threat-model.md",
+        "evidence/week-03/engineering.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-03.test.ts"
+      ],
+      "reviews": [
+        "Revisión del diseño arquitectónico del modelo de amenazas y definición de fronteras de confianza y controles RBAC para CampusOps"
+      ],
+      "prediction": "Esperaba que docs/threat-model.md estructurara las fronteras de confianza y los activos críticos (sesiones, asignaciones, fotos) vinculando amenazas con controles verificables, y que el test público week-03.test.ts validara la presencia de los conceptos obligatorios (activo, amenaza, control, verificación).",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "observedResult": "La prueba 'threat model links assets, threats, controls and verification' pasa exitosamente, confirmando los vínculos entre activos, amenazas, controles y verificación en docs/threat-model.md.",
+      "explanation": "Diseño del modelo de amenazas formal bajo metodología STRIDE, delimitando fronteras de confianza, activos sensibles y priorizando el riesgo de alteración de estado no autorizada (AC-02 y AC-04). Justificación técnica en engineering.json evaluando alternativas de control RBAC y sus trade-offs."
+    },
+    {
+      "studentId": "Integrante3-FallasControles",
+      "commitShas": [
+        "9afc9fac2e589deec4c304b066280cfef25493e6"
+      ],
+      "files": [
+        "reports/week-03/security.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-03.test.ts"
+      ],
+      "reviews": [
+        "Prueba de concepto de fallo y recuperación"
+      ],
+      "prediction": "Al introducir intencionalmente una violación de seguridad modificando la estructura requerida del modelo de amenazas, esperaba que la prueba 'threat model links assets, threats, controls and verification' fallara, demostrando que el entorno detecta omisiones en los controles. Al revertirlo, todo debería pasar de nuevo.",
+      "command": "make public-test-week-03",
+      "observedResult": "El test público detectó el fallo correctamente al remover una palabra clave del threat model. Al revertirlo, los tests pasaron exitosamente. Todo se documentó en reports/week-03/security.json.",
+      "explanation": "Validé el entorno de ejecución asegurándome de que detecta violaciones en las reglas de seguridad requeridas y completé el requerimiento AC-03 consolidando la evidencia."
+    }
+  ]
 }

@@ -1,14 +1,20 @@
 {
   "schemaVersion": 1,
   "week": 4,
-  "commitSha": "REEMPLAZAR_POR_SHA_FINAL",
+  "commitSha": "969c9f90f7aea97b7b4feb939e69d47d4d7977e0",
   "decision": "Selección de expo-secure-store para tokens y sesión, protegiendo credenciales en reposo.",
   "alternatives": [
     "AsyncStorage con cifrado por software (vulnerable a ingeniería inversa)",
     "SQLCipher/MMKV cifrado (sobrecarga innecesaria para claves simples)"
   ],
   "tradeoff": "Beneficio: Protección física de hardware. Costo: Ligera latencia asíncrona y límite de tamaño por clave (2KB).",
-  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
   "verification": [
     {
       "command": "npm test -- course-tests/security-audit.test.ts",

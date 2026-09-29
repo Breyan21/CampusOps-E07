@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "week": 2,
+  "week": 4,
   "mode": "evidence",
-  "commitSha": "e00daf084ab4e9cc4b7fbab194c19ca3345bee92",
-  "evaluatedAt": "2026-09-15T05:39:42.535685+00:00",
+  "commitSha": "97e45d1a8ebc7895fe3f18acceca3ec8692d279a",
+  "evaluatedAt": "2026-09-29T04:09:36.645283+00:00",
   "status": "pass",
   "checks": [
     {
@@ -37,24 +37,29 @@
       "detail": "missing/empty=[]"
     },
     {
-      "id": "schema:reports/week-02/dependencies.json",
+      "id": "schema:reports/week-04/secret-scan.json",
       "status": "pass",
       "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "schema:evidence/week-02/engineering.json",
+      "id": "schema:reports/week-04/negative-tests.json",
+      "status": "pass",
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
+    },
+    {
+      "id": "schema:evidence/week-04/engineering.json",
       "status": "pass",
       "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "schema:evidence/week-02/individual.json",
+      "id": "schema:evidence/week-04/individual.json",
       "status": "pass",
       "detail": "three individual evidence records found"
     },
     {
       "id": "frozen_sha",
       "status": "pass",
-      "detail": "tag=week-02-final tagSha=e3e9b136daffb7fe999d969c8bb0f331896e8e25 head=e3e9b136daffb7fe999d969c8bb0f331896e8e25"
+      "detail": "tag=week-04-final tagSha=97e45d1a8ebc7895fe3f18acceca3ec8692d279a head=97e45d1a8ebc7895fe3f18acceca3ec8692d279a"
     }
   ]
 }

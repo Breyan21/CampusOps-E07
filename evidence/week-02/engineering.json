@@ -1,14 +1,19 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "dab8c87b335663214c40bcabb0c1b1a7fc6abbc9",
+  "commitSha": "e00daf084ab4e9cc4b7fbab194c19ca3345bee92",
   "decision": "Decidimos implementar una arquitectura de 4 capas: UI -> Aplicación -> Dominio <- Infraestructura para desacoplar el origen de los datos de la presentación, cumpliendo con AC-01 y AC-03.",
   "alternatives": [
     "Alternativa A: Que los componentes UI consuman directamente la infraestructura (repositorio o HTTP). Es más rápido de programar, pero acopla el código visual con las reglas de datos, volviéndolo difícil de testear y de cambiar en el futuro sin modificar pantallas.",
     "Alternativa B (elegida): Separación por capas UI -> Application -> Domain <- Infrastructure. Exige escribir más código inicial (casos de uso e interfaces), pero aísla la UI, permite cambiar la base de datos sin afectar presentación y facilita las pruebas unitarias."
   ],
   "tradeoff": "Beneficio: Alta testabilidad y posibilidad de sustituir implementaciones (ej. fake por HTTP real) sin tocar las pantallas (UI). Costo: Requiere más archivos (UseCases, Domain model) y un inyector de dependencias centralizado (Composition Root) que añade complejidad inicial.",
-  "requirementIds": ["AC-01", "AC-02", "AC-03", "AC-04"],
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04"
+  ],
   "verification": [
     {
       "command": "npm run test -- course-tests/architecture-boundaries.test.ts",
