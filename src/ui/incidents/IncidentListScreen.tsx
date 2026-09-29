@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import type { Incident } from '../../domain/incidents/Incident';
 import type { ListIncidents } from '../../application/incidents/ListIncidents';
+import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 
 interface Props {
   listIncidentsUseCase: ListIncidents;
@@ -19,8 +20,11 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, onSe
         setIncidents(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch(() => {
+      logSafeTelemetry('incident_list_load_failed', {
+        feature: 'incident_list',
+        status: 'error',
+      });
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };

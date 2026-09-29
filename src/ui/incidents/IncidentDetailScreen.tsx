@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import type { Incident } from '../../domain/incidents/Incident';
 import type { GetIncidentDetail } from '../../application/incidents/GetIncidentDetail';
+import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 
 interface Props {
   getIncidentDetailUseCase: GetIncidentDetail;
@@ -20,8 +21,12 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
         setIncident(data);
         setLoading(false);
       }
-    }).catch((err: unknown) => {
-      console.error(err);
+    }).catch(() => {
+      logSafeTelemetry('incident_detail_load_failed', {
+        feature: 'incident_detail',
+        incidentId,
+        status: 'error',
+      });
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };
