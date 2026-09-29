@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "mode": "evidence",
+  "commitSha": "e00daf084ab4e9cc4b7fbab194c19ca3345bee92",
+  "evaluatedAt": "2026-09-29T03:46:08.519594+00:00",
+  "status": "fail",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "fail",
+      "detail": "hits=['generate_reports.py:public_secret_name']"
+    },
+    {
+      "id": "required_evidence",
+      "status": "fail",
+      "detail": "missing/empty=['reports/week-04/secret-scan.json', 'reports/week-04/negative-tests.json', 'evidence/week-04/engineering.json', 'evidence/week-04/individual.json']"
+    },
+    {
+      "id": "schema:reports/week-04/secret-scan.json",
+      "status": "fail",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "id": "schema:reports/week-04/negative-tests.json",
+      "status": "fail",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "id": "schema:evidence/week-04/engineering.json",
+      "status": "fail",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "id": "schema:evidence/week-04/individual.json",
+      "status": "fail",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "id": "frozen_sha",
+      "status": "pass",
+      "detail": "tag=week-04-final tagSha=cb5720c0a42b98e6c084ea300b9a3a4f18cfb2c6 head=cb5720c0a42b98e6c084ea300b9a3a4f18cfb2c6"
+    }
+  ]
+}

@@ -5,14 +5,20 @@
   "members": [
     {
       "studentId": "Laloaobes",
-      "commitShas": ["b3d87c4827b86c75d75a0d967a36bc01462ef877"],
+      "commitShas": [
+        "b3d87c4827b86c75d75a0d967a36bc01462ef877"
+      ],
       "files": [
         "src/infrastructure/storage/SecureStorageService.ts",
         "src/api/courseBackend.ts",
         "docs/security-controls.md"
       ],
-      "tests": ["course-tests/security-audit.test.ts (validación de errores HTTP sanitizados)"],
-      "reviews": ["Revisión manual de logs en consola para evitar fugas de infraestructura"],
+      "tests": [
+        "course-tests/security-audit.test.ts (validación de errores HTTP sanitizados)"
+      ],
+      "reviews": [
+        "Revisión manual de logs en consola para evitar fugas de infraestructura"
+      ],
       "prediction": "Los tokens quedarán encriptados por el SO nativo y los fallos de red se mostrarán inofensivos.",
       "command": "npm run typecheck && npm test -- course-tests/security-audit.test.ts",
       "observedResult": "Typecheck sin errores y 7/7 pruebas de security-audit en PASS. Cero stack traces, URLs o puertos expuestos en mensajes y logs.",
@@ -20,7 +26,9 @@
     },
     {
       "studentId": "Breyan21",
-      "commitShas": ["5e92c794519c40b5912f5f137838f715d3cec03e"],
+      "commitShas": [
+        "5e92c794519c40b5912f5f137838f715d3cec03e"
+      ],
       "files": [
         "src/course-evaluation/index.ts",
         "src/telemetry/safeTelemetry.ts",
@@ -38,6 +46,28 @@
       "command": "npm run typecheck; npx jest --ci --runInBand course-tests/public/week-04.test.ts; npx jest --ci --runInBand course-tests/security-audit.test.ts",
       "observedResult": "TypeScript terminó sin errores; la prueba pública de Semana 04 pasó y la auditoría de seguridad completó 7 de 7 pruebas exitosamente.",
       "explanation": "Implementé la redacción recursiva de telemetría, normalicé claves sensibles y conecté eventos sanitizados a las pantallas de lista y detalle para impedir fugas de datos o errores crudos."
+    },
+    {
+      "studentId": "Integrante3-Pruebas",
+      "commitShas": [
+        "e00daf0ccbb4931f8222d4df5585b546dfcbf653"
+      ],
+      "files": [
+        "course-tests/security-audit.test.ts",
+        "reports/week-04/secret-scan.json",
+        "reports/week-04/negative-tests.json",
+        "evidence/week-04/individual.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/security-audit.test.ts"
+      ],
+      "reviews": [
+        "Pruebas negativas de sanitización y evaluación de secretos"
+      ],
+      "prediction": "Al proveer entradas estructuradas complejas a redactForTelemetry, los datos sensibles serán reemplazados por [REDACTED] sin fallar ni omitir campos. El secret scan confirmará la ausencia de llaves privadas.",
+      "command": "npm test -- course-tests/security-audit.test.ts",
+      "observedResult": "Las 12 pruebas pasan exitosamente. El escáner de secretos no reporta fugas de llaves en el código, y el reporte de fallas intencionales funciona correctamente.",
+      "explanation": "Desarrollé la batería de pruebas negativas requeridas para verificar redactForTelemetry, comprobando arreglos y objetos anidados. Asimismo consolidé las evidencias de escaneo de secretos y pruebas unitarias negativas de la semana."
     }
   ]
 }
