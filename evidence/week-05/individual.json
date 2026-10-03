@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "teamId": "equipo07",
+  "members": [
+ {
+  "studentId": "Laloaobes",
+  "commitShas": [
+    "REEMPLAZAR_POR_SHA_FINAL"
+  ],
+  "files": [
+    "src/course-evaluation/index.ts",
+    "src/infrastructure/api/HttpIncidentRepository.ts",
+    "docs/api-contract.md"
+  ],
+  "tests": [
+    "course-tests/public/week-05.test.ts (validación de envolvente y payload nulo)"
+  ],
+  "reviews": [
+    "Revisión de arquitectura para asegurar que el cliente HTTP tipifica los errores correctamente y no fuge llamadas a la UI."
+  ],
+  "prediction": "La función parseRemoteResource interceptará exitosamente cualquier dato malformado, devolviendo {ok: false} antes de que alcance el dominio de la app.",
+  "command": "npm test -- course-tests/public/week-05.test.ts",
+  "observedResult": "Las pruebas de contrato pasaron exitosamente. La validación estructural rechaza payloads inválidos e ignora campos extra.",
+  "explanation": "Implementé el límite estricto del DTO y el parseo seguro para proteger la aplicación frente a respuestas inestables del servidor."
+}
+  ]
+} 
