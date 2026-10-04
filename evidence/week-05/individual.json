@@ -6,7 +6,7 @@
     {
       "studentId": "Laloaobes",
       "commitShas": [
-        "a644c131265f019542d52a502707e3edf31efb17"
+        "8afa2174d96bf995b5077c6e260f82347101c5d4"
       ],
       "files": [
         "src/course-evaluation/index.ts",
@@ -27,7 +27,7 @@
     {
       "studentId": "Breyan21",
       "commitShas": [
-        "a644c131265f019542d52a502707e3edf31efb17"
+        "8afa2174d96bf995b5077c6e260f82347101c5d4"
       ],
       "files": [
         "App.tsx",
@@ -55,7 +55,7 @@
     {
       "studentId": "i3-resiliencia",
       "commitShas": [
-        "a644c131265f019542d52a502707e3edf31efb17"
+        "8afa2174d96bf995b5077c6e260f82347101c5d4"
       ],
       "files": [
         "course-tests/cloud-client.test.ts",
@@ -74,5 +74,5 @@
       "explanation": "Desarrollé la suite de fallos e inmutabilidad (matriz de fallas) para proteger al cliente móvil en condiciones de red hostiles y verifiqué la compatibilidad hacia adelante."
     }
   ],
-  "commitSha": "a644c131265f019542d52a502707e3edf31efb17"
+  "commitSha": "8afa2174d96bf995b5077c6e260f82347101c5d4"
 }

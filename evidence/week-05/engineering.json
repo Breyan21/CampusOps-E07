@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "decision": "Separación estricta entre DTO del servidor y la entidad de dominio",
+  "tradeoffs": [
+    "Beneficio: Aísla la aplicación ante cambios o corrupción del backend (ej. un payload nulo).",
+    "Costo: Sobrecarga en tiempo de ejecución al mapear cada propiedad manualmente o validar tipos explícitamente."
+  ],
+  "residualRisks": [
+    "Desfase semántico: Si el backend cambia el significado lógico de un campo dentro del payload sin alterar su tipo, la validación estructural del DTO lo dejará pasar, introduciendo errores sutiles en la UI."
+  ],
+  "commitSha": "8afa2174d96bf995b5077c6e260f82347101c5d4",
+  "requirementIds": [
+    "AC-02",
+    "AC-04"
+  ],
+  "alternatives": [
+    "DTO con sobre puro",
+    "DTO plano sin sobre",
+    "Librería de validación pesada como Zod"
+  ],
+  "tradeoff": "Beneficio: Aísla la aplicación ante cambios o corrupción del backend (ej. un payload nulo).",
+  "verification": [
+    {
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "result": "5/5 tests passed",
+      "evidence": "Log de consola muestra que las promesas rechazan apropiadamente objetos malformados y payloads nulos antes de alcanzar la lógica de la app."
+    }
+  ]
+}

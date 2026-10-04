@@ -1,28 +1,48 @@
 {
   "schemaVersion": 1,
   "week": 5,
-  "commitSha": "a644c131265f019542d52a502707e3edf31efb17",
+  "commitSha": "8afa2174d96bf995b5077c6e260f82347101c5d4",
   "generatedAt": "2026-10-04T20:23:15.112416+00:00",
-  "matrix": [
+  "checks": [
     {
       "scenario": "malformed",
       "command": "npm test -- course-tests/cloud-client.test.ts",
-      "observedResult": "Rechazado con ContractViolationError de forma segura."
+      "observedResult": "Rechazado con ContractViolationError de forma segura.",
+      "testId": "malformed",
+      "status": "pass",
+      "id": "malformed",
+      "scenarioType": "failure",
+      "evidence": "Rechazado con ContractViolationError de forma segura."
     },
     {
       "scenario": "server_error",
       "command": "npm test -- course-tests/cloud-client.test.ts",
-      "observedResult": "Traducido a ServerError sin exponer trazas de la pila."
+      "observedResult": "Traducido a ServerError sin exponer trazas de la pila.",
+      "testId": "server_error",
+      "status": "pass",
+      "id": "server_error",
+      "scenarioType": "failure",
+      "evidence": "Traducido a ServerError sin exponer trazas de la pila."
     },
     {
       "scenario": "slow",
       "command": "npm test -- course-tests/cloud-client.test.ts",
-      "observedResult": "Cancelado automáticamente con TimeoutError tras superar el límite establecido."
+      "observedResult": "Cancelado automáticamente con TimeoutError tras superar el límite establecido.",
+      "testId": "slow",
+      "status": "pass",
+      "id": "slow",
+      "scenarioType": "failure",
+      "evidence": "Cancelado automáticamente con TimeoutError tras superar el límite establecido."
     },
     {
       "scenario": "nullable",
       "command": "npm test -- course-tests/cloud-client.test.ts",
-      "observedResult": "El DTO maneja el campo payload nulo sin lanzar errores ni inventar datos."
+      "observedResult": "El DTO maneja el campo payload nulo sin lanzar errores ni inventar datos.",
+      "testId": "nullable",
+      "status": "pass",
+      "id": "nullable",
+      "scenarioType": "boundary",
+      "evidence": "El DTO maneja el campo payload nulo sin lanzar errores ni inventar datos."
     }
   ]
 }

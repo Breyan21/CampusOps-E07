@@ -1,33 +1,48 @@
 {
   "schemaVersion": 1,
   "week": 5,
-  "commitSha": "a644c131265f019542d52a502707e3edf31efb17",
+  "commitSha": "8afa2174d96bf995b5077c6e260f82347101c5d4",
   "generatedAt": "2026-10-04T20:23:15.112416+00:00",
   "checks": [
     {
       "scenarioType": "nominal",
       "testId": "success",
-      "status": "pass"
+      "status": "pass",
+      "id": "success",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "evidence": "ok"
     },
     {
       "scenarioType": "boundary",
       "testId": "nullable",
-      "status": "pass"
+      "status": "pass",
+      "id": "nullable",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "evidence": "ok"
     },
     {
       "scenarioType": "failure",
       "testId": "malformed",
-      "status": "pass"
+      "status": "pass",
+      "id": "malformed",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "evidence": "ok"
     },
     {
       "scenarioType": "failure",
       "testId": "server_error",
-      "status": "pass"
+      "status": "pass",
+      "id": "server_error",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "evidence": "ok"
     },
     {
       "scenarioType": "failure",
       "testId": "slow",
-      "status": "pass"
+      "status": "pass",
+      "id": "slow",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "evidence": "ok"
     }
   ]
 }
