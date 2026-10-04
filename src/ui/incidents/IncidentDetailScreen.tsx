@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'rea
 import type { Incident } from '../../domain/incidents/Incident';
 import type { GetIncidentDetail } from '../../application/incidents/GetIncidentDetail';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
+import { isIncidentApiError } from '../../infrastructure/api/IncidentApiError';
 
 interface Props {
   getIncidentDetailUseCase: GetIncidentDetail;
@@ -13,21 +14,31 @@ interface Props {
 export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase, incidentId, onBack }) => {
   const [incident, setIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [loadErrorMessage, setLoadErrorMessage] = useState('No se pudo conectar para consultar la incidencia.');
 
   useEffect(() => {
     let mounted = true;
+    setLoading(true);
+    setLoadError(false);
     getIncidentDetailUseCase.execute(incidentId).then((data: Incident | null) => {
       if (mounted) {
         setIncident(data);
         setLoading(false);
       }
-    }).catch(() => {
+    }).catch((error: unknown) => {
       logSafeTelemetry('incident_detail_load_failed', {
         feature: 'incident_detail',
         incidentId,
         status: 'error',
       });
-      if (mounted) setLoading(false);
+      if (mounted) {
+        setLoadError(true);
+        setLoadErrorMessage(isIncidentApiError(error) && error.kind === 'ServerError'
+          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
+          : 'No se pudo conectar para consultar la incidencia.');
+        setLoading(false);
+      }
     });
     return () => { mounted = false; };
   }, [getIncidentDetailUseCase, incidentId]);
@@ -36,6 +47,15 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.center}>
+        <Text>{loadErrorMessage}</Text>
+        <TouchableOpacity style={styles.button} onPress={onBack}><Text style={styles.buttonText}>Volver</Text></TouchableOpacity>
       </View>
     );
   }
@@ -58,7 +78,7 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
       </TouchableOpacity>
       
       <View style={styles.card}>
-        <Text style={styles.title}>{incident.title}</Text>
+        <Text style={styles.title}>{incident.title ?? incident.description}</Text>
         
         <View style={styles.infoRow}>
           <Text style={styles.label}>ID:</Text>

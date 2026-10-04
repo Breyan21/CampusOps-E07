@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "teamId": "equipo07",
+  "members": [
+ {
+  "studentId": "Laloaobes",
+  "commitShas": [
+    "ccc73ef7dd38dab17f90188db6e1ce227627b12e"
+  ],
+  "files": [
+    "src/course-evaluation/index.ts",
+    "src/infrastructure/api/HttpIncidentRepository.ts",
+    "docs/api-contract.md"
+  ],
+  "tests": [
+    "course-tests/public/week-05.test.ts (validación de envolvente y payload nulo)"
+  ],
+  "reviews": [
+    "Revisión de arquitectura para asegurar que el cliente HTTP tipifica los errores correctamente y no fuge llamadas a la UI."
+  ],
+  "prediction": "La función parseRemoteResource interceptará exitosamente cualquier dato malformado, devolviendo {ok: false} antes de que alcance el dominio de la app.",
+  "command": "npm test -- course-tests/public/week-05.test.ts",
+  "observedResult": "Las pruebas de contrato pasaron exitosamente. La validación estructural rechaza payloads inválidos e ignora campos extra.",
+  "explanation": "Implementé el límite estricto del DTO y el parseo seguro para proteger la aplicación frente a respuestas inestables del servidor."
+},
+{
+  "studentId": "Breyan21",
+  "commitShas": [
+    "1e9249437739d4318ba726a3710d5dce119a1644"
+  ],
+  "files": [
+    "App.tsx",
+    "src/application/incidents/CreateIncident.ts",
+    "src/domain/incidents/Incident.ts",
+    "src/domain/incidents/IncidentRepository.ts",
+    "src/infrastructure/incidents/CampusOpsIncidentRepository.ts",
+    "src/infrastructure/incidents/InMemoryIncidentRepository.ts",
+    "src/ui/incidents/IncidentListScreen.tsx",
+    "src/ui/incidents/IncidentDetailScreen.tsx",
+    "docs/api-contract.md"
+  ],
+  "tests": [
+    "npm run typecheck (comprobación de tipos; no se ejecutó la suite de pruebas)"
+  ],
+  "reviews": [
+    "Revisé que la UI invoque los casos de uso y no realice llamadas HTTP directamente.",
+    "Revisé que un reintento de creación conserve la misma clave de idempotencia y que la telemetría no incluya la descripción ni la ubicación."
+  ],
+  "prediction": "Si una creación falla después de que el servidor pudo haberla procesado, reintentar con la misma clave permitirá al backend reconocer la operación y evitar duplicados. Las respuestas sin payload utilizable no producirán datos de dominio inventados.",
+  "command": "npm run typecheck",
+  "observedResult": "La comprobación de TypeScript terminó sin errores.",
+  "explanation": "Conecté la aplicación al cliente mediante un adaptador de dominio, agregué el caso de uso y el formulario de creación idempotente, y representé los estados de carga, lista vacía y error en la interfaz."
+}
+  ]
+} 

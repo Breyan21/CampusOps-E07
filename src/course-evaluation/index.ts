@@ -7,6 +7,7 @@ import type {
   SyncRecord,
 } from './contracts';
 import type { IncidentLocation } from '../campusops/contracts';
+import { parseRemoteResource as parseIncidentEnvelope } from '../infrastructure/api/remoteResource';
 
 function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
@@ -28,8 +29,9 @@ export function redactForTelemetry(input: unknown): unknown {
   return redact(input);
 }
 
-export function parseRemoteResource(_input: unknown): ParseResult {
-  return pending('parseRemoteResource');
+// Adaptador: delega en el mismo parser que usa HttpIncidentRepository.
+export function parseRemoteResource(input: unknown): ParseResult {
+  return parseIncidentEnvelope(input);
 }
 
 export function coordinateRefresh(_events: readonly AuthEvent[]): Readonly<{
