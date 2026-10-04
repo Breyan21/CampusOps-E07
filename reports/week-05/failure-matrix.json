@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "commitSha": "a644c131265f019542d52a502707e3edf31efb17",
+  "generatedAt": "2026-10-04T20:23:15.112416+00:00",
+  "matrix": [
+    {
+      "scenario": "malformed",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "observedResult": "Rechazado con ContractViolationError de forma segura."
+    },
+    {
+      "scenario": "server_error",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "observedResult": "Traducido a ServerError sin exponer trazas de la pila."
+    },
+    {
+      "scenario": "slow",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "observedResult": "Cancelado automáticamente con TimeoutError tras superar el límite establecido."
+    },
+    {
+      "scenario": "nullable",
+      "command": "npm test -- course-tests/cloud-client.test.ts",
+      "observedResult": "El DTO maneja el campo payload nulo sin lanzar errores ni inventar datos."
+    }
+  ]
+}
