@@ -3,16 +3,22 @@ import { StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { getBackendHealth } from './src/api/courseBackend';
-import { InMemoryIncidentRepository } from './src/infrastructure/incidents/InMemoryIncidentRepository';
+import { CampusOpsIncidentRepository } from './src/infrastructure/incidents/CampusOpsIncidentRepository';
 import { ListIncidents } from './src/application/incidents/ListIncidents';
 import { GetIncidentDetail } from './src/application/incidents/GetIncidentDetail';
+import { CreateIncident } from './src/application/incidents/CreateIncident';
 import { IncidentListScreen } from './src/ui/incidents/IncidentListScreen';
 import { IncidentDetailScreen } from './src/ui/incidents/IncidentDetailScreen';
 
 // Instanciar dependencias de forma centralizada (Composition Root)
-const repository = new InMemoryIncidentRepository();
+const repository = new CampusOpsIncidentRepository({
+  baseUrl: process.env.EXPO_PUBLIC_COURSE_BACKEND_URL ?? 'http://127.0.0.1:4310',
+  accessToken: 'course-valid-token',
+  actorId: 'reporter-1',
+});
 const listIncidentsUseCase = new ListIncidents(repository);
 const getIncidentDetailUseCase = new GetIncidentDetail(repository);
+const createIncidentUseCase = new CreateIncident(repository);
 
 export default function App() {
   const [status, setStatus] = useState<'checking' | 'available' | 'offline'>('checking');
@@ -33,6 +39,7 @@ export default function App() {
       {!selectedIncidentId ? (
         <IncidentListScreen 
           listIncidentsUseCase={listIncidentsUseCase} 
+          createIncidentUseCase={createIncidentUseCase}
           onSelectIncident={setSelectedIncidentId} 
         />
       ) : (

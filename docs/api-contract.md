@@ -10,10 +10,15 @@ Fuente del contrato del servidor: `docs/CAMPUSOPS_API.md` y `course-backend/camp
 | Validación del sobre | `parseRemoteResource` → `ParseResult` | `src/infrastructure/api/remoteResource.ts` |
 | Cliente HTTP | `HttpIncidentRepository` | `src/infrastructure/api/HttpIncidentRepository.ts` |
 | Errores | `IncidentApiError` (`kind` discriminado) | `src/infrastructure/api/IncidentApiError.ts` |
-| Dominio | `Incident` | `src/domain/incidents/Incident.ts` (sin cambios) |
+| Adaptador de dominio | `CampusOpsIncidentRepository` | `src/infrastructure/incidents/CampusOpsIncidentRepository.ts` |
+| Dominio | `Incident` | `src/domain/incidents/Incident.ts` |
+| Casos de uso | `ListIncidents`, `GetIncidentDetail`, `CreateIncident` | `src/application/incidents/` |
 
 - **DTOs:** el cliente sólo devuelve DTOs cuyo sobre ya se validó y nunca devuelve la respuesta cruda.
-- **Mapeo a dominio:** la conversión DTO → `Incident` y la conexión con los casos de uso y la UI quedan fuera de este cliente.
+- **Mapeo a dominio:** `CampusOpsIncidentRepository` convierte DTOs completos al tipo `Incident` que consume la app. El contrato remoto no envía título ni fechas, por eso son opcionales en el dominio; la UI puede mostrar la descripción como título visible, sin incluir ese texto en el DTO enviado.
+- **Payload nulo:** se conserva como una respuesta de transporte válida. En consultas se representa como ausencia de datos de dominio (`null` en detalle, elemento omitido en lista); al recibirlo tras crear, se informa una violación de contrato porque la operación no produjo una incidencia que la app pueda devolver.
+- **Creación idempotente:** `CreateIncident.execute(input, key?)` genera una clave única para una operación nueva. La UI conserva la misma clave cuando ofrece reintentar una solicitud cuyo resultado quedó incierto y descarta la clave cuando el usuario modifica la solicitud.
+- **UI:** las pantallas reciben casos de uso inyectados y nunca llaman `fetch`. La lista distingue carga, vacío y falla de conexión; la pantalla de detalle distingue una incidencia no encontrada de una falla de conexión.
 - **Adaptador evaluable:** `src/course-evaluation/index.ts#parseRemoteResource` delega en el mismo parser que usa el cliente.
 
 ## 2. Solicitudes

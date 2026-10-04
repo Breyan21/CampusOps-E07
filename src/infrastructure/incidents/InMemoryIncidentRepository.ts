@@ -1,5 +1,5 @@
 import type { Incident } from '../../domain/incidents/Incident';
-import type { IncidentRepository } from '../../domain/incidents/IncidentRepository';
+import type { CreateIncidentInput, IncidentRepository } from '../../domain/incidents/IncidentRepository';
 
 export const DEFAULT_SYNTHETIC_INCIDENTS: readonly Incident[] = [
   {
@@ -53,6 +53,7 @@ export const DEFAULT_SYNTHETIC_INCIDENTS: readonly Incident[] = [
 
 export class InMemoryIncidentRepository implements IncidentRepository {
   private readonly incidents: Map<string, Incident>;
+  private sequence = 0;
 
   constructor(initialIncidents: readonly Incident[] = DEFAULT_SYNTHETIC_INCIDENTS) {
     this.incidents = new Map(
@@ -66,5 +67,24 @@ export class InMemoryIncidentRepository implements IncidentRepository {
 
   async getById(id: string): Promise<Incident | null> {
     return this.incidents.get(id) ?? null;
+  }
+
+  async create(input: CreateIncidentInput, _idempotencyKey: string): Promise<Incident> {
+    this.sequence += 1;
+    const now = new Date().toISOString();
+    const incident: Incident = {
+      id: `local-${this.sequence}`,
+      title: input.title?.trim() || input.description.trim(),
+      category: input.category,
+      description: input.description.trim(),
+      status: 'open',
+      priority: 'medium',
+      assignedTechnicianId: null,
+      location: { source: 'manual', label: input.location.trim() },
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.incidents.set(incident.id, incident);
+    return incident;
   }
 }
