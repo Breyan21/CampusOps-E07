@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import type { Incident } from '../../domain/incidents/Incident';
 import type { GetIncidentDetail } from '../../application/incidents/GetIncidentDetail';
@@ -11,37 +11,49 @@ interface Props {
   onBack: () => void;
 }
 
+const defaultLoadErrorMessage = 'No se pudo conectar para consultar la incidencia.';
+
+interface DetailState {
+  incidentId: string;
+  incident: Incident | null;
+  failed: boolean;
+  message: string;
+}
+
 export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase, incidentId, onBack }) => {
-  const [incident, setIncident] = useState<Incident | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [loadErrorMessage, setLoadErrorMessage] = useState('No se pudo conectar para consultar la incidencia.');
+  const [state, setState] = useState<DetailState | null>(null);
+  const requestRef = useRef(0);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setLoadError(false);
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
     getIncidentDetailUseCase.execute(incidentId).then((data: Incident | null) => {
-      if (mounted) {
-        setIncident(data);
-        setLoading(false);
+      if (requestRef.current !== requestId) {
+        return;
       }
+      setState({ incidentId, incident: data, failed: false, message: defaultLoadErrorMessage });
     }).catch((error: unknown) => {
       logSafeTelemetry('incident_detail_load_failed', {
         feature: 'incident_detail',
         incidentId,
         status: 'error',
       });
-      if (mounted) {
-        setLoadError(true);
-        setLoadErrorMessage(isIncidentApiError(error) && error.kind === 'ServerError'
-          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
-          : 'No se pudo conectar para consultar la incidencia.');
-        setLoading(false);
+      if (requestRef.current !== requestId) {
+        return;
       }
+      setState({
+        incidentId,
+        incident: null,
+        failed: true,
+        message: isIncidentApiError(error) && error.kind === 'ServerError'
+          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
+          : defaultLoadErrorMessage,
+      });
     });
-    return () => { mounted = false; };
+    return () => { requestRef.current += 1; };
   }, [getIncidentDetailUseCase, incidentId]);
+
+  const loading = state === null || state.incidentId !== incidentId;
 
   if (loading) {
     return (
@@ -51,14 +63,16 @@ export const IncidentDetailScreen: React.FC<Props> = ({ getIncidentDetailUseCase
     );
   }
 
-  if (loadError) {
+  if (state.failed) {
     return (
       <View style={styles.center}>
-        <Text>{loadErrorMessage}</Text>
+        <Text>{state.message}</Text>
         <TouchableOpacity style={styles.button} onPress={onBack}><Text style={styles.buttonText}>Volver</Text></TouchableOpacity>
       </View>
     );
   }
+
+  const incident = state.incident;
 
   if (!incident) {
     return (
