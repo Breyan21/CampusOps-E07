@@ -81,7 +81,7 @@ describe('HttpIncidentRepository (Pruebas de Contrato y Fallas)', () => {
     expect(response.items).toBeInstanceOf(Array);
     if (response.items.length > 0) {
       expect(response.items[0]).toHaveProperty('id');
-      expect(response.items[0].payload).not.toBeNull();
+      expect(response.items[0]?.payload).not.toBeNull();
     }
   });
 
@@ -90,7 +90,7 @@ describe('HttpIncidentRepository (Pruebas de Contrato y Fallas)', () => {
     const response = await repo.getAll();
     expect(response.items).toBeInstanceOf(Array);
     if (response.items.length > 0) {
-      expect(response.items[0].payload).toBeNull();
+      expect(response.items[0]?.payload).toBeNull();
     }
   });
 
