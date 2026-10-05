@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "commitSha": "eda4e82dd90b6df8af8059de67ef50ace5c964ee",
+  "generatedAt": "2026-10-05T01:50:55+00:00",
+  "checks": [
+    {
+      "scenario": "malformed",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "observedResult": "La promesa de getAll() se rechaza con kind ContractViolationError (status null) tras 2 ms.",
+      "testId": "malformed",
+      "status": "pass",
+      "id": "malformed",
+      "scenarioType": "failure",
+      "evidence": "Prueba «malformed: DTO con campos faltantes o tipos incorrectos (rechazado seguro)» — PASS. El DTO valida la forma antes de mapear, así que el dominio nunca ve un recurso incompleto; la telemetría registrada es incident_api_failed { operation: 'list', kind: 'ContractViolationError', status: null, durationMs: 2 }."
+    },
+    {
+      "scenario": "server_error",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "observedResult": "La respuesta HTTP 500 se traduce a kind ServerError con status 500 tras 2 ms.",
+      "testId": "server_error",
+      "status": "pass",
+      "id": "server_error",
+      "scenarioType": "failure",
+      "evidence": "Prueba «server_error: simulación de error HTTP 500 (sin exponer stack traces)» — PASS. El repositorio captura el error y devuelve una variante tipada; ni el mensaje ni la traza de la pila llegan a la UI. Telemetría: incident_api_failed { operation: 'list', kind: 'ServerError', status: 500, durationMs: 2 }."
+    },
+    {
+      "scenario": "slow",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "observedResult": "Con timeoutMs=500 y retraso de 1200 ms, la promesa se cancela con kind TimeoutError a los 537 ms.",
+      "testId": "slow",
+      "status": "pass",
+      "id": "slow",
+      "scenarioType": "failure",
+      "evidence": "Prueba «slow: timeout supera umbral y retorna TimeoutError» — PASS. El AbortSignal corta la petición y el rechazo es un TimeoutError, sin dejar la interfaz en estado de carga eterno ni con datos parciales."
+    },
+    {
+      "scenario": "nullable",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "observedResult": "El sobre con payload: null se acepta y el primer elemento expone payload === null.",
+      "testId": "nullable",
+      "status": "pass",
+      "id": "nullable",
+      "scenarioType": "boundary",
+      "evidence": "Prueba «nullable: sobre válido con payload: null (no inventa propiedades)» — PASS. Es el caso límite que separa «payload ausente» de «payload vacío»: el dominio recibe null en lugar de un objeto fabricated."
+    },
+    {
+      "scenario": "timeout-retry-idempotency",
+      "command": "npm run backend:self-test",
+      "observedResult": "Controlled backend self-test passed (roles, reasignación conflictiva, respuesta perdida, idempotencia, evidencia y geocodificación).",
+      "testId": "backend-self-test",
+      "status": "pass",
+      "id": "timeout-retry-idempotency",
+      "scenarioType": "failure",
+      "evidence": "Tras un timeout la app puede reintentar sin duplicar la incidencia: CreateIncident reutiliza la misma clave de idempotencia y el backend controlado la reconoce. No depende de un servicio externo real."
+    }
+  ]
+}

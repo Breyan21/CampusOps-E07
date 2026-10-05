@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "commitSha": "eda4e82dd90b6df8af8059de67ef50ace5c964ee",
+  "decision": "El cliente HTTPtraduce el recurso remoto en tres capas separadas: el DTO de transporte (incidentDtos.ts + remoteResource.ts) valida forma y tipos del sobre 'payload' y rechaza nulidades antes de mapear; la entidad de dominio (src/domain/incidents/Incident.ts) no conoce el JSON; y el error se representa como variantes tipadas ContractViolationError | ServerError | TimeoutError en IncidentApiError.ts, de modo que ni la UI ni la telemetría reciben respuestas crudas ni stack traces.",
+  "alternatives": [
+    "Un solo tipo DTO que se reutiliza como entidad de dominio, sin capa de mapeo intermedia",
+    "Validación con una librería de esquemas externa (Zod) en lugar de guardas explícitas por tipo",
+    "Exponer la respuesta cruda del backend a la aplicación y validar solo en el punto de uso final"
+  ],
+  "tradeoff": "Beneficio: la aplicación queda aislada de la forma del JSON y cada fallo de red o de contrato tiene un kind consultable, lo que permite probarlo con sustitutos controlados. Costo: cada propiedad se valida y mapea a mano (parseRemoteResource más el repositorio), hay duplicación de tipos entre DTO y dominio, y el mapper debe mantenerse cuando el backend evoluciona.",
+  "tradeoffs": [
+    "Beneficio: Aísla la aplicación ante cambios o corrupción del backend (ej. un payload nulo).",
+    "Costo: Sobrecarga en tiempo de ejecución al mapear cada propiedad manualmente o validar tipos explícitamente.",
+    "Costo adicional: la verificación de tipos en tiempo de compilación (tsc --noEmit) es la que detecta el desajuste entre DTO y entidad."
+  ],
+  "residualRisks": [
+    "Desfase semántico: Si el backend cambia el significado lógico de un campo dentro del payload sin alterar su tipo, la validación estructural del DTO lo dejará pasar, introduciendo errores sutiles en la UI.",
+    "El cliente depende del contrato publicado en docs/api-contract.md; si ese documento y el servidor divergen, las pruebas de contrato con el backend controlado dejan de ser representativas."
+  ],
+  "requirementIds": [
+    "AC-02",
+    "AC-03",
+    "AC-04"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "result": "Tests: 5 passed, 5 total (success, nullable, malformed, server_error, slow)",
+      "evidence": "La suite levanta el backend controlado con COURSE_BACKEND_PORT=0 y observa los kinds ContractViolationError, ServerError y TimeoutError; el caso slow se cancela a los 537 ms con un umbral de 500 ms. Ningún caso alcanza la lógica de la aplicación con datos malformados."
+    },
+    {
+      "command": "npm test -- --ci --runInBand course-tests/public/week-05.test.ts",
+      "result": "Tests: 5 passed, 5 total",
+      "evidence": "parseRemoteResource acepta el sobre con payload válido, admite payload: null, ignora campos extra y rechaza id vacío, version como string y recurso nulo."
+    },
+    {
+      "command": "npm run typecheck && npm run lint",
+      "result": "tsc --noEmit sin diagnósticos; eslint . con 0 errores",
+      "evidence": "La frontera entre capas se verifica en compilación: DTO, dominio y errores son tipos distintos y ninguna capa importa respuestas crudas del backend."
+    },
+    {
+      "command": "npm run backend:self-test",
+      "result": "Controlled backend self-test passed",
+      "evidence": "Los contratos del backend controlado (roles, reasignación, respuesta perdida, idempotencia, evidencia y geocodificación) pasan, de modo que las fallas probadas son reproducibles sin un servicio real."
+    }
+  ]
+}
