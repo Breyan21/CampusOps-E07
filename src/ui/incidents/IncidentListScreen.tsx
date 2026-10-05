@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import type { Incident } from '../../domain/incidents/Incident';
 import type { ListIncidents } from '../../application/incidents/ListIncidents';
@@ -16,45 +16,59 @@ interface Props {
 
 const categories: readonly IncidentCategory[] = ['electrical', 'laboratory', 'water', 'connectivity', 'equipment', 'safety', 'maintenance'];
 
+const defaultLoadErrorMessage = 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.';
+
 export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, createIncidentUseCase, onSelectIncident }) => {
   const [incidents, setIncidents] = useState<readonly Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [loadErrorMessage, setLoadErrorMessage] = useState('No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.');
+  const [loadErrorMessage, setLoadErrorMessage] = useState(defaultLoadErrorMessage);
   const [creating, setCreating] = useState(false);
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState<IncidentCategory>('maintenance');
   const [createError, setCreateError] = useState('');
   const [retryKey, setRetryKey] = useState<string | null>(null);
+  const requestRef = useRef(0);
 
-  const load = () => {
-    setLoading(true);
-    setLoadError(false);
-    setLoadErrorMessage('No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.');
-    let mounted = true;
+  const runLoad = useCallback(() => {
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
     listIncidentsUseCase.execute().then((data: readonly Incident[]) => {
-      if (mounted) {
-        setIncidents(data);
-        setLoading(false);
+      if (requestRef.current !== requestId) {
+        return;
       }
+      setIncidents(data);
+      setLoadError(false);
+      setLoadErrorMessage(defaultLoadErrorMessage);
+      setLoading(false);
     }).catch((error: unknown) => {
       logSafeTelemetry('incident_list_load_failed', {
         feature: 'incident_list',
         status: 'error',
       });
-      if (mounted) {
-        setLoadError(true);
-        setLoadErrorMessage(isIncidentApiError(error) && error.kind === 'ServerError'
-          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
-          : 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.');
-        setLoading(false);
+      if (requestRef.current !== requestId) {
+        return;
       }
+      setLoadError(true);
+      setLoadErrorMessage(isIncidentApiError(error) && error.kind === 'ServerError'
+        ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
+        : defaultLoadErrorMessage);
+      setLoading(false);
     });
-    return () => { mounted = false; };
-  };
+  }, [listIncidentsUseCase]);
 
-  useEffect(() => load(), [listIncidentsUseCase]);
+  useEffect(() => {
+    runLoad();
+    return () => { requestRef.current += 1; };
+  }, [runLoad]);
+
+  const reload = () => {
+    setLoading(true);
+    setLoadError(false);
+    setLoadErrorMessage(defaultLoadErrorMessage);
+    runLoad();
+  };
 
   const submit = async () => {
     setCreating(true);
@@ -65,7 +79,7 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, crea
       await createIncidentUseCase.execute({ category, description, location }, key);
       setDescription(''); setLocation(''); setRetryKey(null);
       setCreating(false);
-      load();
+      reload();
     } catch (error: unknown) {
       logSafeTelemetry('incident_create_failed', { feature: 'incident_create', status: 'error' });
       setCreateError(isIncidentApiError(error) && error.kind === 'ServerError'
@@ -86,7 +100,7 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, crea
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Incidencias</Text>
-      {loadError ? <View accessibilityRole="alert"><Text>{loadErrorMessage}</Text><TouchableOpacity onPress={load}><Text style={styles.link}>Reintentar</Text></TouchableOpacity></View> : null}
+      {loadError ? <View accessibilityRole="alert"><Text>{loadErrorMessage}</Text><TouchableOpacity onPress={reload}><Text style={styles.link}>Reintentar</Text></TouchableOpacity></View> : null}
       {incidents.length === 0 && !loadError ? <Text>No hay incidencias disponibles.</Text> : null}
       <FlatList
         data={incidents}
