@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "week": 5,
+  "commitSha": "eda4e82dd90b6df8af8059de67ef50ace5c964ee",
+  "generatedAt": "2026-10-05T01:50:55+00:00",
+  "checks": [
+    {
+      "scenarioType": "nominal",
+      "testId": "success",
+      "status": "pass",
+      "id": "success",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "evidence": "success: respuesta válida y mapeo correcto a entidades de dominio — PASS. getAll() resuelve con items como arreglo y el primer elemento trae id y payload no nulo."
+    },
+    {
+      "scenarioType": "boundary",
+      "testId": "nullable",
+      "status": "pass",
+      "id": "nullable",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "evidence": "nullable: sobre válido con payload: null (no inventa propiedades) — PASS. El DTO admite payload nulo y lo refleja como null en el dominio sin crear propiedades inexistentes."
+    },
+    {
+      "scenarioType": "failure",
+      "testId": "malformed",
+      "status": "pass",
+      "id": "malformed",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "evidence": "malformed: DTO con campos faltantes o tipos incorrectos — PASS. getAll() rechaza con kind ContractViolationError y la telemetría solo registra operation, kind, status y durationMs."
+    },
+    {
+      "scenarioType": "failure",
+      "testId": "server_error",
+      "status": "pass",
+      "id": "server_error",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "evidence": "server_error: simulación de error HTTP 500 — PASS. El cliente traduce la respuesta a kind ServerError con status 500, sin exponer el cuerpo ni la traza de la pila."
+    },
+    {
+      "scenarioType": "failure",
+      "testId": "slow",
+      "status": "pass",
+      "id": "slow",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client.test.ts",
+      "evidence": "slow: timeout supera umbral — PASS. Con timeoutMs=500 y una respuesta retrasada 1200 ms, la promesa se cancela con kind TimeoutError a los 537 ms."
+    },
+    {
+      "scenarioType": "nominal",
+      "testId": "public-week-05",
+      "status": "pass",
+      "id": "public-week-05",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-05.test.ts",
+      "evidence": "Tests: 5 passed, 5 total. parseRemoteResource acepta el sobre published, admite payload null e ignora campos extra; rechaza id vacío, version numérica como string y entrada nula."
+    }
+  ]
+}
