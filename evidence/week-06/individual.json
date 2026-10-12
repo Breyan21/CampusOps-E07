@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "teamId": "equipo07",
+  "members": [
+    {
+      "studentId": "Laloaobes",
+      "commitShas": [
+        "REEMPLAZAR_CON_SHA_DE_TU_COMMIT"
+      ],
+      "files": [
+        "src/course-evaluation/index.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "reports/week-06/concurrency.json"
+      ],
+      "tests": [
+        "course-tests/public/week-06.test.ts",
+        "course-tests/cloud-client.test.ts"
+      ],
+      "reviews": [
+        "Revisé que sólo un 401 dispare la renovación; un 403 es falta de permiso y se propaga sin reintento.",
+        "Revisé que la promesa compartida se limpie una sola vez con .finally() encadenado a la renovación, para que un solicitante tardío no borre una renovación más nueva."
+      ],
+      "prediction": "Si tres solicitudes reciben 401 al mismo tiempo, todas esperarán la misma promesa sharedRefreshPromise: habrá una sola llamada a POST /v1/session/refresh y cada solicitud se reintentará una vez con el nuevo token. Si la renovación falla, todas terminarán en UnauthorizedError sin entrar en bucle.",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts",
+      "observedResult": "Las 2 pruebas de week-06.test.ts pasaron. npm run typecheck y eslint sobre los archivos modificados terminaron sin errores. En una prueba local con fetch simulado, tres 401 concurrentes generaron 1 llamada de refresh y 3 reintentos exitosos; con refresh fallido, ambas solicitudes rechazaron con UnauthorizedError y se registró 1 sola renovación.",
+      "explanation": "Implementé coordinateRefresh como máquina de estados (refreshCalls limitado a 1 por ráfaga de 401, refreshFailed y logout regresan a anonymous sin token) y el interceptor single-flight en HttpIncidentRepository: el 401 se captura en send(), la renovación se comparte mediante sharedRefreshPromise y retryCount impide más de un reintento por solicitud."
+    },
+    {
+      "studentId": "Breyan21",
+      "commitShas": [],
+      "files": [],
+      "tests": [],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    },
+    {
+      "studentId": "MigueleArt",
+      "commitShas": [],
+      "files": [],
+      "tests": [],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    }
+  ]
+}

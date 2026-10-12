@@ -34,14 +34,45 @@ export function parseRemoteResource(input: unknown): ParseResult {
   return parseIncidentEnvelope(input);
 }
 
-export function coordinateRefresh(_events: readonly AuthEvent[]): Readonly<{
+// Single-flight: los 401 concurrentes comparten una sola renovación y cada solicitud se reintenta una vez.
+export function coordinateRefresh(events: readonly AuthEvent[]): Readonly<{
   status: 'anonymous' | 'authenticated';
   activeGeneration: number | null;
   refreshCalls: number;
   retriedRequestIds: readonly string[];
   persistedToken: string | null;
 }> {
-  return pending('coordinateRefresh');
+  let status: 'anonymous' | 'authenticated' = 'authenticated';
+  let activeGeneration: number | null = 0;
+  let refreshCalls = 0;
+  const retriedRequestIds: string[] = [];
+  let persistedToken: string | null = null;
+  let isRefreshing = false;
+
+  for (const event of events) {
+    if (event.type === 'request401') {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshCalls++;
+      }
+      if (event.requestId !== undefined && !retriedRequestIds.includes(event.requestId)) {
+        retriedRequestIds.push(event.requestId);
+      }
+    } else if (event.type === 'refreshSucceeded') {
+      isRefreshing = false;
+      activeGeneration = event.generation ?? activeGeneration;
+      persistedToken = event.token ?? null;
+      status = 'authenticated';
+    } else {
+      // refreshFailed o logout: la sesión se descarta por completo.
+      isRefreshing = false;
+      activeGeneration = null;
+      persistedToken = null;
+      status = 'anonymous';
+    }
+  }
+
+  return { status, activeGeneration, refreshCalls, retriedRequestIds, persistedToken };
 }
 
 export function resolveSync(
