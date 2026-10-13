@@ -28,7 +28,7 @@ const repository = new CampusOpsIncidentRepository({
   onSessionStateChange: (event) => {
     if (event.type === 'refreshing') authService.setRefreshing(true);
     if (event.type === 'authenticated') authService.refreshSucceeded(event.accessToken, event.refreshToken);
-    if (event.type === 'expired') authService.setExpired();
+    if (event.type === 'expired') void authService.setExpired();
   },
 });
 

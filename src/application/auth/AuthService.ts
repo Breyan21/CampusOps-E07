@@ -2,6 +2,11 @@ import type { SessionState, UserRole, UserSession } from '../../domain/auth/type
 import { KNOWN_FIXTURE_ACTORS } from '../../domain/auth/types';
 import { coordinateRefresh } from '../../course-evaluation';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
+import {
+  clearAllSessionTokens,
+  getToken,
+  saveToken,
+} from '../../infrastructure/storage/SecureStorageService';
 
 export type SessionChangeListener = (session: UserSession | null, state: SessionState) => void;
 
@@ -91,6 +96,10 @@ export class AuthService {
       };
 
       this.session = session;
+      await saveToken('accessToken', session.accessToken);
+      if (session.refreshToken) {
+        await saveToken('refreshToken', session.refreshToken);
+      }
       this.setState('authenticated');
       logSafeTelemetry('auth_login_success', { role: session.role });
       return session;
@@ -102,6 +111,7 @@ export class AuthService {
 
   async logout(): Promise<void> {
     coordinateRefresh([{ type: 'logout' }]);
+    await clearAllSessionTokens();
     this.session = null;
     this.setState('unauthenticated');
     logSafeTelemetry('auth_logout_success', { status: 'logged_out' });
@@ -123,14 +133,38 @@ export class AuthService {
       accessToken,
       ...(refreshToken ? { refreshToken } : {}),
     };
+    void saveToken('accessToken', accessToken);
+    if (refreshToken) {
+      void saveToken('refreshToken', refreshToken);
+    }
     this.setState('authenticated');
   }
 
-  setExpired(): void {
+  async setExpired(): Promise<void> {
     coordinateRefresh([{ type: 'refreshFailed' }]);
+    await clearAllSessionTokens();
     this.session = null;
     this.setState('expired');
     logSafeTelemetry('auth_session_expired', { status: 'expired' });
+  }
+
+  async restoreFromStorage(actorId: string, role: UserRole): Promise<UserSession | null> {
+    const accessToken = await getToken('accessToken');
+    const refreshToken = await getToken('refreshToken');
+    if (!accessToken) {
+      this.session = null;
+      this.setState('unauthenticated');
+      return null;
+    }
+    const session: UserSession = {
+      actorId,
+      role,
+      accessToken,
+      ...(refreshToken ? { refreshToken } : {}),
+    };
+    this.session = session;
+    this.setState('authenticated');
+    return session;
   }
 
   subscribe(listener: SessionChangeListener): () => void {

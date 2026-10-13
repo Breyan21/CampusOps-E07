@@ -46,3 +46,9 @@ export async function removeToken(key: SessionTokenKey): Promise<boolean> {
     return false;
   }
 }
+
+export async function clearAllSessionTokens(): Promise<boolean> {
+  const accessRemoved = await removeToken('accessToken');
+  const refreshRemoved = await removeToken('refreshToken');
+  return accessRemoved && refreshRemoved;
+}
