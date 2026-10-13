@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "week": 6,
   "mode": "public",
-  "commitSha": "da9a7dcae40bab9872f8fd5d555942b628bdf876",
-  "evaluatedAt": "2026-10-12T19:30:05.675174+00:00",
-  "status": "fail",
+  "commitSha": "6c1ba577087454e29b9f65e9b7af3875b46c8ee1",
+  "evaluatedAt": "2026-10-13T04:53:17.361764+00:00",
+  "status": "pass",
   "checks": [
     {
       "id": "base_files",
@@ -33,33 +33,28 @@
     },
     {
       "id": "required_evidence",
-      "status": "fail",
-      "detail": "missing/empty=['docs/session-state-machine.mmd', 'reports/week-06/auth-tests.json', 'evidence/week-06/engineering.json', 'evidence/week-06/individual.json']"
+      "status": "pass",
+      "detail": "missing/empty=[]"
+    },
+    {
+      "id": "schema:reports/week-06/auth-tests.json",
+      "status": "pass",
+      "detail": "5 checks indexed, 2 boundary/failure; evidence-only commit; invalid changes=[]"
     },
     {
       "id": "schema:reports/week-06/concurrency.json",
-      "status": "fail",
-      "detail": "commitSha must be a full lowercase Git SHA"
+      "status": "pass",
+      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "toolchain_1",
-      "status": "fail",
-      "detail": "npm run typecheck\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+      "id": "schema:evidence/week-06/engineering.json",
+      "status": "pass",
+      "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
     },
     {
-      "id": "toolchain_2",
-      "status": "fail",
-      "detail": "npm run lint\n[WinError 2] El sistema no puede encontrar el archivo especificado"
-    },
-    {
-      "id": "toolchain_3",
-      "status": "fail",
-      "detail": "npm run audit:ci\n[WinError 2] El sistema no puede encontrar el archivo especificado"
-    },
-    {
-      "id": "toolchain_4",
-      "status": "fail",
-      "detail": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts\n[WinError 2] El sistema no puede encontrar el archivo especificado"
+      "id": "schema:evidence/week-06/individual.json",
+      "status": "pass",
+      "detail": "three individual evidence records found"
     }
   ]
 }

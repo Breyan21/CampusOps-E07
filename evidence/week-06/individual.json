@@ -58,14 +58,30 @@
     },
     {
       "studentId": "MigueleArt",
-      "commitShas": [],
-      "files": [],
-      "tests": [],
-      "reviews": [],
-      "prediction": "",
-      "command": "",
-      "observedResult": "",
-      "explanation": ""
+      "commitShas": [
+        "3dcc83a9f470499c0297d1c2459a9ed371f65bf3"
+      ],
+      "files": [
+        "src/infrastructure/storage/SecureStorageService.ts",
+        "src/application/auth/AuthService.ts",
+        "App.tsx",
+        "course-tests/auth-lifecycle.test.ts",
+        "reports/week-06/auth-tests.json"
+      ],
+      "tests": [
+        "course-tests/auth-lifecycle.test.ts",
+        "course-tests/security-audit.test.ts",
+        "course-tests/public/week-06.test.ts"
+      ],
+      "reviews": [
+        "Revisé que ni en SecureStorageService ni en AuthService ni en telemetría se impriman valores reales de tokens en console.error o console.info.",
+        "Revisé que el logout estricto y el fallo de refresh (setExpired) borren de inmediato tanto accessToken como refreshToken de SecureStore y nulifiquen la sesión en memoria.",
+        "Revisé que el retorno ante falla terminal de coordinateRefresh transicione la UI a 'expired' mostrando la opción de volver a iniciar sesión sin generar bucles infinitos."
+      ],
+      "prediction": "Al implementar el guardado en SecureStore y la función estricta de logout, cualquier llamada a logout() o setExpired() eliminará físicamente los tokens persistidos en el almacenamiento seguro del dispositivo y descartará la sesión en memoria, asegurando que ante fallas de renovación o cierre de sesión la app quede en modo anónimo/expirado sin credenciales remanentes ni fugas en logs.",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "observedResult": "Las 10 pruebas de course-tests/auth-lifecycle.test.ts pasaron exitosamente. Se verificó que los tokens se guardan con WHEN_UNLOCKED_THIS_DEVICE_ONLY, no se filtran en consola/telemetría, logout y setExpired limpian SecureStore al 100%, y los permisos de los 3 perfiles se validan correctamente.",
+      "explanation": "Implementé la integración de SecureStore en AuthService para guardar accessToken y refreshToken en hardware seguro tras login y refresh, el logout estricto (clearAllSessionTokens) que elimina por completo el estado persistido, y la degradación segura a expired cuando coordinateRefresh falla. Además consolidé los reportes de pruebas auth-tests.json y las evidencias individuales y de ingeniería del equipo."
     }
   ]
 }
