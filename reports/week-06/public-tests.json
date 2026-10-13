@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "week": 6,
   "mode": "public",
-  "commitSha": "6c1ba577087454e29b9f65e9b7af3875b46c8ee1",
-  "evaluatedAt": "2026-10-13T04:53:17.361764+00:00",
-  "status": "pass",
+  "commitSha": "c612933543e46de76c5a4c92663f71cf43822314",
+  "evaluatedAt": "2026-10-13T05:13:27.915487+00:00",
+  "status": "fail",
   "checks": [
     {
       "id": "base_files",
@@ -38,23 +38,43 @@
     },
     {
       "id": "schema:reports/week-06/auth-tests.json",
-      "status": "pass",
-      "detail": "5 checks indexed, 2 boundary/failure; evidence-only commit; invalid changes=[]"
+      "status": "fail",
+      "detail": "commitSha must be HEAD or its direct evidence-only parent"
     },
     {
       "id": "schema:reports/week-06/concurrency.json",
-      "status": "pass",
-      "detail": "2 checks indexed, 1 boundary/failure; evidence-only commit; invalid changes=[]"
+      "status": "fail",
+      "detail": "commitSha must be HEAD or its direct evidence-only parent"
     },
     {
       "id": "schema:evidence/week-06/engineering.json",
-      "status": "pass",
-      "detail": "decision evidence is substantive and reproducible; evidence-only commit; invalid changes=[]"
+      "status": "fail",
+      "detail": "commitSha must be HEAD or its direct evidence-only parent"
     },
     {
       "id": "schema:evidence/week-06/individual.json",
       "status": "pass",
       "detail": "three individual evidence records found"
+    },
+    {
+      "id": "toolchain_1",
+      "status": "pass",
+      "detail": "npm run typecheck\n> dmi-react-native-starter@1.0.0 typecheck\n> tsc --noEmit"
+    },
+    {
+      "id": "toolchain_2",
+      "status": "pass",
+      "detail": "npm run lint\n> dmi-react-native-starter@1.0.0 lint\n> eslint .\n\n\nC:\\Users\\jmigu\\Documents\\UTT\\10MO CUATRI\\DesarrolloMovilIntegral\\CampusOps-E07\\course-tests\\cloud-client.test.ts\n  38:19  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports\n\nâœ– 1 problem (0 errors, 1 warning)"
+    },
+    {
+      "id": "toolchain_3",
+      "status": "pass",
+      "detail": "npm run audit:ci\nersions of node-forge\n        node_modules/expo/node_modules/@expo/cli\n          expo  >=45.0.0-beta.1\n          Depends on vulnerable versions of @expo/cli\n          Depends on vulnerable versions of @expo/metro\n          Depends on vulnerable versions of @expo/metro-config\n          node_modules/expo\n        @expo/metro-config  >=0.21.0-canary-20250630-547cd82\n        Depends on vulnerable versions of @expo/metro\n        node_modules/@expo/metro-config\n      metro  >=0.71.0\n      Depends on vulnerable versions of metro-config\n      Depends on vulnerable versions of metro-file-map\n      Depends on vulnerable versions of metro-transform-worker\n      node_modules/metro\n        @react-native/community-cli-plugin  *\n        Depends on vulnerable versions of metro\n        Depends on vulnerable versions of metro-config\n        node_modules/@react-native/community-cli-plugin\n        metro-config  >=0.71.0\n        Depends on vulnerable versions of metro\n        node_modules/metro-config\n        metro-transform-worker  >=0.71.0\n        Depends on vulnerable versions of metro\n        node_modules/metro-transform-worker\n\ncompression  <1.8.2\nSeverity: high\ncompression vulnerable to Denial of Service via memory leak on premature response close - https://github.com/advisories/GHSA-vc2v-76pw-4v95\nfix available via `npm audit fix`\nnode_modules/compression\n\njs-yaml  3.0.0 - 4.3.1\nSeverity: high\njs-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources - https://github.com/advisories/GHSA-2883-xcg3-v3hh\njs-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources - https://github.com/advisories/GHSA-2883-xcg3-v3hh\nDepends on vulnerable versions of argparse\nfix available via `npm audit fix`\nnode_modules/@expo/xcpretty/node_modules/js-yaml\nnode_modules/js-yaml\n\nnode-forge  *\nSeverity: high\nnode-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements - https://github.com/advisories/GHSA-86w9-cpqp-85rv\nfix available via `npm audit fix --force`\nWill install expo@44.0.6, which is a breaking change\nnode_modules/node-forge\n  @expo/code-signing-certificates  *\n  Depends on vulnerable versions of node-forge\n  node_modules/@expo/code-signing-certificates\n\nsource-map-js  1.0.0 - 1.2.1\nSeverity: high\nsource-map-js allows event-loop denial of service through indexed source-map section offsets - https://github.com/advisories/GHSA-68fv-2mgg-jv7q\nfix available via `npm audit fix`\nnode_modules/source-map-js\n\nsprintf-js  *\nSeverity: moderate\nsprintf-js vulnerable to denial of service through unbounded precision specifiers - https://github.com/advisories/GHSA-hp3w-g68c-fv3c\nfix available via `npm audit fix`\nnode_modules/sprintf-js\n  argparse  1.0.0 - 1.0.10\n  Depends on vulnerable versions of sprintf-js\n  node_modules/argparse\n\n31 vulnerabilities (2 moderate, 29 high)\n\nTo address issues that do not require attention, run:\n  npm audit fix\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force"
+    },
+    {
+      "id": "toolchain_4",
+      "status": "pass",
+      "detail": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-06.test.ts\n\n\nPASS course-tests/public/week-06.test.ts\n  âˆš coalesces concurrent 401s into one refresh and retries each request once (2 ms)\n  âˆš logout removes persisted session state\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total\nSnapshots:   0 total\nTime:        0.82 s, estimated 1 s\nRan all test suites matching /course-tests\\\\public\\\\week-06.test.ts/i."
     }
   ]
 }

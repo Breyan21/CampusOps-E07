@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 6,
-  "commitSha": "3dcc83a9f470499c0297d1c2459a9ed371f65bf3",
+  "commitSha": "c612933543e46de76c5a4c92663f71cf43822314",
   "decision": "Implementamos una política de renovación de sesión basada en single-flight (promesa compartida sharedRefreshPromise) en la capa de red, sincronizada con persistencia en hardware mediante SecureStore y un gestor de estado centralizado. Ante errores 401 concurrentes, las peticiones entrantes se encolan sobre una única operación de renovación hacia /v1/session/refresh, limitando las llamadas a exactamente 1 y reintentando cada solicitud un máximo de una vez con el nuevo token. Si la renovación falla definitivamente (invalid_grant o error de red), el sistema transiciona a un estado seguro terminal: se purgan de inmediato los tokens persistidos en SecureStore (clearAllSessionTokens), se descarta la sesión en memoria y se transiciona a 'expired' (o 'unauthenticated' en logout), conduciendo a la interfaz de login sin incurrir en bucles de reintento.",
   "alternatives": [
     "Reintentos individuales no coordinados donde cada respuesta 401 lanza su propia petición de refresco compitiendo entre sí",
