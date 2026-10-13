@@ -4,6 +4,8 @@ import type { Incident } from '../../domain/incidents/Incident';
 import type { ListIncidents } from '../../application/incidents/ListIncidents';
 import type { CreateIncident } from '../../application/incidents/CreateIncident';
 import type { IncidentCategory } from '../../campusops/contracts';
+import type { UserRole } from '../../domain/auth/types';
+import { canCreateIncident } from '../../domain/auth/permissions';
 import { createIdempotencyKey } from '../../application/incidents/CreateIncident';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 import { isIncidentApiError } from '../../infrastructure/api/IncidentApiError';
@@ -12,13 +14,23 @@ interface Props {
   listIncidentsUseCase: ListIncidents;
   createIncidentUseCase: CreateIncident;
   onSelectIncident: (id: string) => void;
+  currentRole?: UserRole | null;
+  currentActorId?: string | null;
 }
 
-const categories: readonly IncidentCategory[] = ['electrical', 'laboratory', 'water', 'connectivity', 'equipment', 'safety', 'maintenance'];
+const categories: readonly IncidentCategory[] = [
+  'electrical', 'laboratory', 'water', 'connectivity', 'equipment', 'safety', 'maintenance'
+];
 
 const defaultLoadErrorMessage = 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.';
 
-export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, createIncidentUseCase, onSelectIncident }) => {
+export const IncidentListScreen: React.FC<Props> = ({
+  listIncidentsUseCase,
+  createIncidentUseCase,
+  onSelectIncident,
+  currentRole,
+  currentActorId,
+}) => {
   const [incidents, setIncidents] = useState<readonly Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -30,30 +42,27 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, crea
   const [createError, setCreateError] = useState('');
   const [retryKey, setRetryKey] = useState<string | null>(null);
   const requestRef = useRef(0);
+  const role = currentRole ?? null;
+  const hasSession = Boolean(role && currentActorId);
 
   const runLoad = useCallback(() => {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
     listIncidentsUseCase.execute().then((data: readonly Incident[]) => {
-      if (requestRef.current !== requestId) {
-        return;
-      }
+      if (requestRef.current !== requestId) return;
       setIncidents(data);
       setLoadError(false);
       setLoadErrorMessage(defaultLoadErrorMessage);
       setLoading(false);
     }).catch((error: unknown) => {
-      logSafeTelemetry('incident_list_load_failed', {
-        feature: 'incident_list',
-        status: 'error',
-      });
-      if (requestRef.current !== requestId) {
-        return;
-      }
+      logSafeTelemetry('incident_list_load_failed', { feature: 'incident_list', status: 'error' });
+      if (requestRef.current !== requestId) return;
       setLoadError(true);
-      setLoadErrorMessage(isIncidentApiError(error) && error.kind === 'ServerError'
-        ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
-        : defaultLoadErrorMessage);
+      setLoadErrorMessage(
+        isIncidentApiError(error) && error.kind === 'ServerError'
+          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
+          : defaultLoadErrorMessage,
+      );
       setLoading(false);
     });
   }, [listIncidentsUseCase]);
@@ -71,23 +80,33 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, crea
   };
 
   const submit = async () => {
+    if (!hasSession || !role || !canCreateIncident(role)) {
+      setCreateError('Permiso denegado: tu perfil no tiene autorización para crear incidencias.');
+      return;
+    }
     setCreating(true);
     setCreateError('');
     const key = retryKey ?? createIdempotencyKey();
     setRetryKey(key);
     try {
       await createIncidentUseCase.execute({ category, description, location }, key);
-      setDescription(''); setLocation(''); setRetryKey(null);
+      setDescription('');
+      setLocation('');
+      setRetryKey(null);
       setCreating(false);
       reload();
     } catch (error: unknown) {
       logSafeTelemetry('incident_create_failed', { feature: 'incident_create', status: 'error' });
-      setCreateError(isIncidentApiError(error) && error.kind === 'ServerError'
-        ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
-        : 'No se pudo conectar. Puedes reintentar de forma segura.');
+      setCreateError(
+        isIncidentApiError(error) && error.kind === 'ServerError'
+          ? 'El servidor tuvo un problema. Inténtalo de nuevo más tarde.'
+          : 'No se pudo conectar. Puedes reintentar de forma segura.',
+      );
       setCreating(false);
     }
   };
+
+  const showCreateForm = hasSession && role !== null && canCreateIncident(role);
 
   if (loading) {
     return (
@@ -100,30 +119,83 @@ export const IncidentListScreen: React.FC<Props> = ({ listIncidentsUseCase, crea
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Incidencias</Text>
-      {loadError ? <View accessibilityRole="alert"><Text>{loadErrorMessage}</Text><TouchableOpacity onPress={reload}><Text style={styles.link}>Reintentar</Text></TouchableOpacity></View> : null}
-      {incidents.length === 0 && !loadError ? <Text>No hay incidencias disponibles.</Text> : null}
+
+      {loadError ? (
+        <View accessibilityRole="alert" style={styles.errorBox}>
+          <Text style={styles.errorText}>{loadErrorMessage}</Text>
+          <TouchableOpacity onPress={reload}>
+            <Text style={styles.link}>Reintentar</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {incidents.length === 0 && !loadError ? (
+        <Text style={styles.emptyText}>No hay incidencias disponibles para este perfil.</Text>
+      ) : null}
+
       <FlatList
         data={incidents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={styles.card} 
-            onPress={() => onSelectIncident(item.id)}
-          >
+          <TouchableOpacity style={styles.card} onPress={() => onSelectIncident(item.id)}>
             <Text style={styles.cardTitle}>{item.title ?? item.description}</Text>
-            <Text style={styles.cardStatus}>Estado: {item.status}</Text>
-            <Text style={styles.cardCategory}>Categoría: {item.category}</Text>
+            <View style={styles.cardMeta}>
+              <Text style={styles.cardStatus}>Estado: {item.status}</Text>
+              <Text style={styles.cardCategory}>Categoría: {item.category}</Text>
+            </View>
+            {item.assignedTechnicianId ? (
+              <Text style={styles.cardTech}>Técnico: {item.assignedTechnicianId}</Text>
+            ) : null}
           </TouchableOpacity>
         )}
       />
-      <View style={styles.form}>
-        <Text style={styles.formTitle}>Crear incidencia</Text>
-        <TextInput accessibilityLabel="Descripción" placeholder="Describe el problema" value={description} onChangeText={(value) => { setDescription(value); setRetryKey(null); }} style={styles.input} />
-        <TextInput accessibilityLabel="Ubicación" placeholder="Ubicación" value={location} onChangeText={(value) => { setLocation(value); setRetryKey(null); }} style={styles.input} />
-        <View style={styles.categories}>{categories.map((item) => <TouchableOpacity key={item} onPress={() => { setCategory(item); setRetryKey(null); }} style={[styles.category, category === item && styles.selected]}><Text>{item}</Text></TouchableOpacity>)}</View>
-        {createError ? <Text accessibilityRole="alert">{createError}</Text> : null}
-        <TouchableOpacity disabled={creating || !description.trim() || !location.trim()} onPress={submit} style={styles.createButton}><Text style={styles.createText}>{creating ? 'Enviando…' : 'Enviar incidencia'}</Text></TouchableOpacity>
-      </View>
+
+      {showCreateForm ? (
+        <View style={styles.form}>
+          <Text style={styles.formTitle}>Crear incidencia</Text>
+          <TextInput
+            accessibilityLabel="Descripción"
+            placeholder="Describe el problema"
+            value={description}
+            onChangeText={(value) => { setDescription(value); setRetryKey(null); }}
+            style={styles.input}
+          />
+          <TextInput
+            accessibilityLabel="Ubicación"
+            placeholder="Ubicación"
+            value={location}
+            onChangeText={(value) => { setLocation(value); setRetryKey(null); }}
+            style={styles.input}
+          />
+          <View style={styles.categories}>
+            {categories.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => { setCategory(item); setRetryKey(null); }}
+                style={[styles.category, category === item && styles.selected]}
+              >
+                <Text style={category === item ? styles.selectedCategoryText : styles.categoryText}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {createError ? <Text accessibilityRole="alert" style={styles.createErrorText}>{createError}</Text> : null}
+          <TouchableOpacity
+            disabled={creating || !description.trim() || !location.trim()}
+            onPress={submit}
+            style={[styles.createButton, (creating || !description.trim() || !location.trim()) && styles.disabledButton]}
+          >
+            <Text style={styles.createText}>{creating ? 'Enviando...' : 'Enviar incidencia'}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : role ? (
+        <View style={styles.roleNotice}>
+          <Text style={styles.roleNoticeText}>
+            {role === 'technician'
+              ? 'Perfil de técnico: consulta y atiende las incidencias que tiene asignadas.'
+              : 'El perfil de coordinación administra y prioriza las incidencias; la creación de reportes corresponde al perfil reportante.'}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -140,42 +212,84 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 16,
-    marginTop: 40,
+    marginBottom: 12,
     color: '#333',
+  },
+  errorBox: {
+    padding: 12,
+    backgroundColor: '#ffebee',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  errorText: {
+    color: '#c62828',
+    fontSize: 14,
+  },
+  emptyText: {
+    color: '#666',
+    fontStyle: 'italic',
+    marginVertical: 12,
+    textAlign: 'center',
   },
   card: {
     backgroundColor: '#fff',
-    padding: 16,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 10,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
+    color: '#222',
+  },
+  cardMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   cardStatus: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: '#555',
+    fontWeight: '500',
   },
   cardCategory: {
-    fontSize: 14,
-    color: '#888',
+    fontSize: 13,
+    color: '#777',
   },
-  link: { color: '#007AFF', paddingVertical: 8 },
-  form: { backgroundColor: '#fff', padding: 12, gap: 8, marginTop: 8 },
-  formTitle: { fontSize: 18, fontWeight: '700' },
-  input: { borderWidth: 1, borderColor: '#bbb', borderRadius: 6, padding: 10 },
+  cardTech: {
+    fontSize: 12,
+    color: '#0277bd',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  link: { color: '#007AFF', paddingVertical: 6, fontWeight: '600' },
+  form: { backgroundColor: '#fff', padding: 14, gap: 10, marginTop: 8, borderRadius: 8 },
+  formTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, fontSize: 14 },
   categories: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  category: { padding: 6, borderWidth: 1, borderColor: '#bbb', borderRadius: 5 },
-  selected: { backgroundColor: '#d9eaff', borderColor: '#007AFF' },
+  category: { paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#ccc', borderRadius: 16 },
+  categoryText: { fontSize: 12, color: '#555' },
+  selected: { backgroundColor: '#e3f2fd', borderColor: '#007AFF' },
+  selectedCategoryText: { fontSize: 12, color: '#007AFF', fontWeight: '700' },
   createButton: { backgroundColor: '#007AFF', padding: 12, borderRadius: 6, alignItems: 'center' },
+  disabledButton: { backgroundColor: '#b0bec5' },
   createText: { color: '#fff', fontWeight: '700' },
+  createErrorText: { color: '#d32f2f', fontSize: 13 },
+  roleNotice: {
+    padding: 12,
+    backgroundColor: '#e1f5fe',
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  roleNoticeText: {
+    color: '#01579b',
+    fontSize: 13,
+    lineHeight: 18,
+  },
 });

@@ -8,6 +8,7 @@ export type IncidentPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export type Incident = Readonly<{
   id: string;
+  version?: number;
   title?: string;
   category: IncidentCategory;
   description: string;

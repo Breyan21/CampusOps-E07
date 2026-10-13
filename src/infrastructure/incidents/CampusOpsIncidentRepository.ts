@@ -42,6 +42,20 @@ export class CampusOpsIncidentRepository implements IncidentRepository {
     if (!mapped) throw new IncidentApiError('ContractViolationError');
     return mapped;
   }
+  async executeAction(id: string, actionBody: Record<string, unknown>, idempotencyKey: string): Promise<Incident> {
+    const { incident } = await this.client.executeAction(id, actionBody, idempotencyKey);
+    const mapped = toIncident(incident);
+    if (!mapped) throw new IncidentApiError('ContractViolationError');
+    return mapped;
+  }
+
+  setSession(accessToken: string, actorId: string, refreshToken?: string): void {
+    this.client.setSession(accessToken, actorId, refreshToken);
+  }
+
+  clearSession(): void {
+    this.client.clearSession();
+  }
 }
 
 function toIncident(resource: IncidentResourceDto): Incident | null {
@@ -59,6 +73,7 @@ function toIncident(resource: IncidentResourceDto): Incident | null {
 
   return {
     id: resource.id,
+    version: resource.version,
     category: category as IncidentCategory,
     description,
     location: { source: 'manual', label: location },

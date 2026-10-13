@@ -87,4 +87,29 @@ export class InMemoryIncidentRepository implements IncidentRepository {
     this.incidents.set(incident.id, incident);
     return incident;
   }
+  async executeAction(id: string, actionBody: Record<string, unknown>, _idempotencyKey: string): Promise<Incident> {
+    const existing = this.incidents.get(id);
+    if (!existing) throw new Error('Incident not found');
+    const action = actionBody.action as string;
+    let updated: Incident = {
+      ...existing,
+      version: (existing.version ?? 1) + 1,
+      updatedAt: new Date().toISOString(),
+    };
+    if (action === 'start') {
+      updated = { ...updated, status: 'in_progress' };
+    } else if (action === 'resolve') {
+      updated = { ...updated, status: 'resolved' };
+    } else if (action === 'close') {
+      updated = { ...updated, status: 'closed' };
+    } else if (action === 'reopen') {
+      updated = { ...updated, status: updated.assignedTechnicianId ? 'assigned' : 'open' };
+    } else if (action === 'assign') {
+      updated = { ...updated, assignedTechnicianId: actionBody.technicianId as string, status: 'assigned' };
+    } else if (action === 'prioritize') {
+      updated = { ...updated, priority: actionBody.priority as Incident['priority'] };
+    }
+    this.incidents.set(id, updated);
+    return updated;
+  }
 }

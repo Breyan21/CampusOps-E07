@@ -23,9 +23,15 @@ export type HttpIncidentRepositoryOptions = Readonly<{
   fetchImpl?: typeof fetch;
   // Sólo para pruebas: selecciona una variante pública del simulador (X-Course-Scenario).
   scenario?: string;
+  onSessionStateChange?: (event: SessionRefreshEvent) => void;
 }>;
 
-type Operation = 'list' | 'detail' | 'create';
+export type SessionRefreshEvent =
+  | Readonly<{ type: 'refreshing' }>
+  | Readonly<{ type: 'authenticated'; accessToken: string; refreshToken?: string }>
+  | Readonly<{ type: 'expired' }>;
+
+type Operation = 'list' | 'detail' | 'create' | 'action';
 
 const NOT_FOUND = Symbol('not_found');
 
@@ -41,12 +47,14 @@ export class HttpIncidentRepository {
   private readonly fetchImpl: typeof fetch;
   private accessToken: string;
   private refreshToken: string | undefined;
+  private actorId: string;
 
   constructor(private readonly options: HttpIncidentRepositoryOptions) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.fetchImpl = options.fetchImpl ?? ((...args) => fetch(...args));
     this.accessToken = options.accessToken;
     this.refreshToken = options.refreshToken;
+    this.actorId = options.actorId;
   }
 
   async getAll(): Promise<IncidentListResponseDto> {
@@ -66,6 +74,27 @@ export class HttpIncidentRepository {
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
       body: JSON.stringify(body),
     }, parseCreateIncidentResponse);
+  }
+
+  async executeAction(id: string, body: Readonly<Record<string, unknown>>, idempotencyKey: string): Promise<CreateIncidentResponseDto> {
+    const path = `/v1/incidents/${encodeURIComponent(id)}/actions`;
+    return this.request('action', path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+      body: JSON.stringify(body),
+    }, parseCreateIncidentResponse);
+  }
+
+  setSession(accessToken: string, actorId: string, refreshToken?: string): void {
+    this.accessToken = accessToken;
+    this.actorId = actorId;
+    this.refreshToken = refreshToken;
+  }
+
+  clearSession(): void {
+    this.accessToken = '';
+    this.actorId = '';
+    this.refreshToken = undefined;
   }
 
   private async request<T>(
@@ -108,9 +137,21 @@ export class HttpIncidentRepository {
 
   private refreshSession(): Promise<string | null> {
     if (sharedRefreshPromise === null) {
+      this.options.onSessionStateChange?.({ type: 'refreshing' });
       // El finally se encadena una sola vez a la promesa compartida, así ningún
       // solicitante tardío puede limpiar una renovación más nueva que la que esperaba.
-      sharedRefreshPromise = this.requestNewAccessToken().finally(() => {
+      sharedRefreshPromise = this.requestNewAccessToken().then((token) => {
+        if (token === null) {
+          this.options.onSessionStateChange?.({ type: 'expired' });
+        } else {
+          this.options.onSessionStateChange?.({
+            type: 'authenticated',
+            accessToken: token,
+            ...(this.refreshToken ? { refreshToken: this.refreshToken } : {}),
+          });
+        }
+        return token;
+      }).finally(() => {
         sharedRefreshPromise = null;
       });
     }
@@ -175,7 +216,7 @@ export class HttpIncidentRepository {
     return {
       Accept: 'application/json',
       Authorization: `Bearer ${this.accessToken}`,
-      'X-Course-Actor': this.options.actorId,
+      'X-Course-Actor': this.actorId,
       ...(this.options.scenario ? { 'X-Course-Scenario': this.options.scenario } : {}),
     };
   }
