@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
+import type { SessionTokenKey, SessionTokenStore } from '../../domain/auth/types';
 
-export type SessionTokenKey = 'accessToken' | 'refreshToken';
+export type { SessionTokenKey } from '../../domain/auth/types';
 
 // SecureStore solo acepta claves alfanuméricas con ".", "-" y "_".
 const STORAGE_KEYS: Readonly<Record<SessionTokenKey, string>> = {
@@ -52,3 +53,12 @@ export async function clearAllSessionTokens(): Promise<boolean> {
   const refreshRemoved = await removeToken('refreshToken');
   return accessRemoved && refreshRemoved;
 }
+
+// Adaptador que implementa el puerto de dominio (SessionTokenStore) para inyectarlo
+// en la capa de aplicación sin que ésta dependa de la infraestructura.
+export const sessionTokenStore: SessionTokenStore = {
+  save: saveToken,
+  get: getToken,
+  remove: removeToken,
+  clear: clearAllSessionTokens,
+};

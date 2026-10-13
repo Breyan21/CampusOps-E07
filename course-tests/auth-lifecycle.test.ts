@@ -10,7 +10,7 @@ import {
   canStartIncident,
 } from '../src/domain/auth/permissions';
 import { coordinateRefresh } from '../src/course-evaluation';
-import { getToken } from '../src/infrastructure/storage/SecureStorageService';
+import { getToken, sessionTokenStore } from '../src/infrastructure/storage/SecureStorageService';
 
 const mockStore = new Map<string, string>();
 
@@ -38,6 +38,7 @@ describe('AuthService & Secure Storage Lifecycle (Semana 06 - Integrante 3)', ()
 
     authService = new AuthService({
       baseUrl: 'http://127.0.0.1:4310',
+      sessionStore: sessionTokenStore,
       fetchImpl: jest.fn(async (input, init) => {
         const url = String(input);
         if (url.endsWith('/v1/session/login')) {
