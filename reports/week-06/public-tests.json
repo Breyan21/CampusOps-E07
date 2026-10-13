@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "week": 6,
   "mode": "public",
-  "commitSha": "c612933543e46de76c5a4c92663f71cf43822314",
-  "evaluatedAt": "2026-10-13T05:13:27.915487+00:00",
+  "commitSha": "ed459c5abb29ff3682e26515614973c0f9c4a612",
+  "evaluatedAt": "2026-10-13T05:35:05.142129+00:00",
   "status": "fail",
   "checks": [
     {
@@ -74,7 +74,7 @@
     {
       "id": "toolchain_4",
       "status": "pass",
-      "detail": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-06.test.ts\n\n\nPASS course-tests/public/week-06.test.ts\n  âˆš coalesces concurrent 401s into one refresh and retries each request once (2 ms)\n  âˆš logout removes persisted session state\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total\nSnapshots:   0 total\nTime:        0.82 s, estimated 1 s\nRan all test suites matching /course-tests\\\\public\\\\week-06.test.ts/i."
+      "detail": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts\n> dmi-react-native-starter@1.0.0 test\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/public/week-06.test.ts\n\n\nPASS course-tests/public/week-06.test.ts\n  âˆš coalesces concurrent 401s into one refresh and retries each request once (2 ms)\n  âˆš logout removes persisted session state\n\nTest Suites: 1 passed, 1 total\nTests:       2 passed, 2 total\nSnapshots:   0 total\nTime:        0.815 s, estimated 1 s\nRan all test suites matching /course-tests\\\\public\\\\week-06.test.ts/i."
     }
   ]
 }
