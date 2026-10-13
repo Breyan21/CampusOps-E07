@@ -8,7 +8,7 @@ import type { UserRole } from '../../domain/auth/types';
 import { canCreateIncident } from '../../domain/auth/permissions';
 import { createIdempotencyKey } from '../../application/incidents/CreateIncident';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
-import { isIncidentApiError } from '../../infrastructure/api/IncidentApiError';
+import { isIncidentApiError } from '../../domain/errors/IncidentApiError';
 
 interface Props {
   listIncidentsUseCase: ListIncidents;

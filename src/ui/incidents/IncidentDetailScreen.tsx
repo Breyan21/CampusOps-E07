@@ -13,7 +13,7 @@ import {
   canStartIncident,
 } from '../../domain/auth/permissions';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
-import { isIncidentApiError } from '../../infrastructure/api/IncidentApiError';
+import { isIncidentApiError } from '../../domain/errors/IncidentApiError';
 
 interface Props {
   getIncidentDetailUseCase: GetIncidentDetail;

@@ -9,6 +9,7 @@ import { GetIncidentDetail } from './src/application/incidents/GetIncidentDetail
 import { CreateIncident } from './src/application/incidents/CreateIncident';
 import { ExecuteIncidentAction } from './src/application/incidents/ExecuteIncidentAction';
 import { AuthService } from './src/application/auth/AuthService';
+import { sessionTokenStore } from './src/infrastructure/storage/SecureStorageService';
 import type { SessionState, UserRole } from './src/domain/auth/types';
 import { SessionStatusBar } from './src/ui/auth/SessionStatusBar';
 import { LoginModal } from './src/ui/auth/LoginModal';
@@ -18,7 +19,7 @@ import { IncidentDetailScreen } from './src/ui/incidents/IncidentDetailScreen';
 const backendUrl = process.env.EXPO_PUBLIC_COURSE_BACKEND_URL ?? 'http://127.0.0.1:4310';
 
 // Instanciar dependencias de forma centralizada (Composition Root)
-const authService = new AuthService({ baseUrl: backendUrl });
+const authService = new AuthService({ baseUrl: backendUrl, sessionStore: sessionTokenStore });
 
 const repository = new CampusOpsIncidentRepository({
   baseUrl: backendUrl,
@@ -28,7 +29,7 @@ const repository = new CampusOpsIncidentRepository({
   onSessionStateChange: (event) => {
     if (event.type === 'refreshing') authService.setRefreshing(true);
     if (event.type === 'authenticated') authService.refreshSucceeded(event.accessToken, event.refreshToken);
-    if (event.type === 'expired') authService.setExpired();
+    if (event.type === 'expired') void authService.setExpired();
   },
 });
 

@@ -64,6 +64,7 @@
       "metro": "0.84.5",
       "metro-config": "0.84.5",
       "metro-core": "0.84.5"
-    }
+    },
+    "shell-quote": "^1.12.0"
   }
 }

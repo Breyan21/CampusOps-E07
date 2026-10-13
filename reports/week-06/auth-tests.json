@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "c612933543e46de76c5a4c92663f71cf43822314",
+  "generatedAt": "2026-10-12T22:50:00Z",
+  "checks": [
+    {
+      "id": "auth_login_secure_storage",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "evidence": "Login exitoso con perfiles conocidos persiste los tokens en SecureStore con restricciones de hardware (WHEN_UNLOCKED_THIS_DEVICE_ONLY) y sanitiza logs evitando exponer credenciales en stdout/stderr."
+    },
+    {
+      "id": "auth_authorization_profile_permissions",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "evidence": "Validación estricta de permisos diferenciados: reportante sólo crea, técnico inicia/resuelve incidencias asignadas a su actorId, y coordinador asigna, prioriza, cierra y reabre."
+    },
+    {
+      "id": "auth_refresh_token_rotation",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "evidence": "refreshSucceeded actualiza atómicamente el accessToken y refreshToken en SecureStore manteniendo el estado de sesión autenticado sin fugas de información."
+    },
+    {
+      "id": "auth_strict_logout_wipe",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "evidence": "Logout estricto invoca coordinateRefresh con tipo logout, elimina por completo tokens persistidos en SecureStore (clearAllSessionTokens) y anula la sesión en memoria pasando a unauthenticated."
+    },
+    {
+      "id": "auth_refresh_failure_safe_degradation",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "evidence": "Cuando la renovación falla definitivamente (invalid_grant), setExpired limpia los tokens persistidos en SecureStore, anula la sesión en memoria y coloca la app en estado expired retornando al login de forma segura sin bucles infinitos."
+    }
+  ]
+}

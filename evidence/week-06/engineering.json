@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "c612933543e46de76c5a4c92663f71cf43822314",
+  "decision": "Implementamos una política de renovación de sesión basada en single-flight (promesa compartida sharedRefreshPromise) en la capa de red, sincronizada con persistencia en hardware mediante SecureStore y un gestor de estado centralizado. Ante errores 401 concurrentes, las peticiones entrantes se encolan sobre una única operación de renovación hacia /v1/session/refresh, limitando las llamadas a exactamente 1 y reintentando cada solicitud un máximo de una vez con el nuevo token. Si la renovación falla definitivamente (invalid_grant o error de red), el sistema transiciona a un estado seguro terminal: se purgan de inmediato los tokens persistidos en SecureStore (clearAllSessionTokens), se descarta la sesión en memoria y se transiciona a 'expired' (o 'unauthenticated' en logout), conduciendo a la interfaz de login sin incurrir en bucles de reintento.",
+  "alternatives": [
+    "Reintentos individuales no coordinados donde cada respuesta 401 lanza su propia petición de refresco compitiendo entre sí",
+    "Semáforo o temporizador síncrono previo al envío que bloquea todo el tráfico saliente estimando la expiración de forma local",
+    "Invalidador estricto que descarta la sesión inmediatamente al recibir cualquier 401 sin intentar renovar el token"
+  ],
+  "tradeoff": "Beneficio: se evita el efecto thundering herd sobre el servidor de autenticación, se neutralizan condiciones de carrera en rotación de tokens y se garantiza un estado limpio en hardware ante fallos o revocaciones. Costo: se añade acoplamiento temporal y coordinación asíncrona entre el interceptor de red, el almacenamiento seguro y los observadores de la interfaz de usuario.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npx jest course-tests/public/week-06.test.ts",
+      "result": "Tests: 2 passed, 2 total",
+      "evidence": "Comprueba que múltiples 401 concurrentes se unifican en una sola llamada de refresh, reintentando cada solicitud una vez, y que el logout elimina el estado de persistencia."
+    },
+    {
+      "command": "npx jest course-tests/auth-lifecycle.test.ts",
+      "result": "Tests: 10 passed, 10 total",
+      "evidence": "Comprueba el almacenamiento seguro en SecureStore, sanitización en logs y telemetría, validación de permisos por perfil, persistencia tras renovación, logout estricto y transición segura a 'expired' cuando el refresh falla."
+    },
+    {
+      "command": "npm run typecheck && npm run lint",
+      "result": "tsc --noEmit sin diagnósticos; eslint sin errores",
+      "evidence": "Garantiza tipado estricto en los estados de sesión, interfaces de DTOs, llamadas al almacenamiento seguro y ausencia de errores de sintaxis o estilo."
+    },
+    {
+      "command": "npm run backend:self-test",
+      "result": "Controlled backend self-test passed",
+      "evidence": "Los contratos del backend de prueba (roles, conflicto de asignación, respuesta perdida, idempotencia, evidencia y geocodificación) pasan satisfactoriamente."
+    }
+  ]
+}
