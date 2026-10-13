@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "teamId": "equipo07",
+  "members": [
+    {
+      "studentId": "Laloaobes",
+      "commitShas": [
+        "da9a7dcae40bab9872f8fd5d555942b628bdf876"
+      ],
+      "files": [
+        "src/course-evaluation/index.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "reports/week-06/concurrency.json"
+      ],
+      "tests": [
+        "course-tests/public/week-06.test.ts",
+        "course-tests/cloud-client.test.ts"
+      ],
+      "reviews": [
+        "Revisé que sólo un 401 dispare la renovación; un 403 es falta de permiso y se propaga sin reintento.",
+        "Revisé que la promesa compartida se limpie una sola vez con .finally() encadenado a la renovación, para que un solicitante tardío no borre una renovación más nueva."
+      ],
+      "prediction": "Si tres solicitudes reciben 401 al mismo tiempo, todas esperarán la misma promesa sharedRefreshPromise: habrá una sola llamada a POST /v1/session/refresh y cada solicitud se reintentará una vez con el nuevo token. Si la renovación falla, todas terminarán en UnauthorizedError sin entrar en bucle.",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-06.test.ts",
+      "observedResult": "Las 2 pruebas de week-06.test.ts pasaron. npm run typecheck y eslint sobre los archivos modificados terminaron sin errores. En una prueba local con fetch simulado, tres 401 concurrentes generaron 1 llamada de refresh y 3 reintentos exitosos; con refresh fallido, ambas solicitudes rechazaron con UnauthorizedError y se registró 1 sola renovación.",
+      "explanation": "Implementé coordinateRefresh como máquina de estados (refreshCalls limitado a 1 por ráfaga de 401, refreshFailed y logout regresan a anonymous sin token) y el interceptor single-flight en HttpIncidentRepository: el 401 se captura en send(), la renovación se comparte mediante sharedRefreshPromise y retryCount impide más de un reintento por solicitud."
+    },
+    {
+      "studentId": "Breyan21",
+      "commitShas": [
+        "b82303dd54871706473519797601b04c02bb8083"
+      ],
+      "files": [
+        "App.tsx",
+        "src/application/auth/AuthService.ts",
+        "src/application/incidents/ExecuteIncidentAction.ts",
+        "src/domain/auth/permissions.ts",
+        "src/domain/auth/types.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "src/infrastructure/incidents/CampusOpsIncidentRepository.ts",
+        "src/ui/auth/LoginModal.tsx",
+        "src/ui/auth/SessionStatusBar.tsx",
+        "src/ui/incidents/IncidentDetailScreen.tsx",
+        "src/ui/incidents/IncidentListScreen.tsx",
+        "docs/session-state-machine.mmd"
+      ],
+      "tests": [],
+      "reviews": [
+        "Revisé que los permisos de la UI coincidan con el contrato: sólo reportantes pueden crear; sólo el técnico asignado puede iniciar o resolver; coordinación puede asignar, priorizar, cerrar y reabrir según el estado.",
+        "Revisé que las acciones también pasen por ExecuteIncidentAction y que una sesión nula no herede permisos de reportante.",
+        "Revisé que los estados de renovación del cliente actualicen la sesión visible y que un refresh fallido lleve a sesión expirada, requiriendo iniciar sesión otra vez."
+      ],
+      "prediction": "Al iniciar sin sesión, CampusOps pedirá autenticación y no mostrará operaciones protegidas. Tras elegir un perfil, la UI mostrará únicamente las acciones permitidas; las acciones incompatibles con el rol o la asignación serán rechazadas por el caso de uso. Un refresh exitoso restaurará el estado autenticado y uno fallido dejará la sesión expirada.",
+      "command": "npm run typecheck",
+      "observedResult": "npm run typecheck terminó sin errores. npm run lint terminó con 0 errores y una advertencia preexistente de no-require-imports en course-tests/cloud-client.test.ts:38. No ejecuté pruebas automatizadas para esta aportación.",
+      "explanation": "Implementé el flujo de perfiles y autorización para las pantallas y los casos de uso, conecté los cambios de estado del refresh con la barra de sesión y añadí el diagrama Mermaid. La revisión de permisos confirma que el perfil reportante es el único autorizado para crear según el backend; el técnico sólo puede iniciar o resolver su incidencia asignada, y coordinación dispone de asignación, prioridad, cierre y reapertura."
+    },
+    {
+      "studentId": "MigueleArt",
+      "commitShas": [],
+      "files": [],
+      "tests": [],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    }
+  ]
+}

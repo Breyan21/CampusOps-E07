@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> unauthenticated
+
+    unauthenticated --> authenticating: login iniciado
+    authenticating --> authenticated: respuesta válida y perfil reconocido
+    authenticating --> unauthenticated: rechazo, red o contrato inválido
+
+    authenticated --> refreshing: una solicitud recibe 401
+    refreshing --> authenticated: refresh compartido exitoso / reintentar solicitud una vez
+    refreshing --> expired: refresh fallido / descartar sesión en memoria
+
+    authenticated --> unauthenticated: logout / eliminar sesión
+    refreshing --> unauthenticated: logout / invalidar sesión
+    expired --> authenticating: iniciar sesión de nuevo

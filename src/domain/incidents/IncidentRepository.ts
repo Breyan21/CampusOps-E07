@@ -12,4 +12,7 @@ export interface IncidentRepository {
   getAll(): Promise<readonly Incident[]>;
   getById(id: string): Promise<Incident | null>;
   create(input: CreateIncidentInput, idempotencyKey: string): Promise<Incident>;
+  executeAction?(id: string, actionBody: Record<string, unknown>, idempotencyKey: string): Promise<Incident>;
+  setSession?(accessToken: string, actorId: string, refreshToken?: string): void;
+  clearSession?(): void;
 }

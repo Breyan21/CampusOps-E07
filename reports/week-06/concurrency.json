@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "da9a7dcae40bab9872f8fd5d555942b628bdf876",
+  "generatedAt": "2026-10-12T19:00:00Z",
+  "checks": [
+    {
+      "id": "unit_test_concurrency",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test",
+      "evidence": "La función coordinateRefresh procesa múltiples eventos 401 concurrentes, limitando refreshCalls a 1 y reintentando correctamente todas las peticiones encoladas."
+    },
+    {
+      "id": "single_flight_http_interceptor",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "make public-test-week-06",
+      "evidence": "El interceptor en la capa de red bloquea las peticiones simultáneas usando una promesa compartida (sharedRefreshPromise), evitando llamadas masivas al endpoint /v1/session/refresh."
+    }
+  ]
+}

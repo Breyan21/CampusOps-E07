@@ -16,16 +16,27 @@ export type HttpIncidentRepositoryOptions = Readonly<{
   baseUrl: string;
   // Sesión sintética del backend didáctico (fixtures públicos, no credenciales reales).
   accessToken: string;
+  // Si se provee, un 401 dispara una renovación compartida (single-flight) y un reintento.
+  refreshToken?: string;
   actorId: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
   // Sólo para pruebas: selecciona una variante pública del simulador (X-Course-Scenario).
   scenario?: string;
+  onSessionStateChange?: (event: SessionRefreshEvent) => void;
 }>;
 
-type Operation = 'list' | 'detail' | 'create';
+export type SessionRefreshEvent =
+  | Readonly<{ type: 'refreshing' }>
+  | Readonly<{ type: 'authenticated'; accessToken: string; refreshToken?: string }>
+  | Readonly<{ type: 'expired' }>;
+
+type Operation = 'list' | 'detail' | 'create' | 'action';
 
 const NOT_FOUND = Symbol('not_found');
+
+// Renovación en curso compartida: los 401 concurrentes esperan esta misma promesa.
+let sharedRefreshPromise: Promise<string | null> | null = null;
 
 /**
  * Cliente HTTP de incidencias. Devuelve únicamente DTOs con el sobre ya validado y
@@ -34,10 +45,16 @@ const NOT_FOUND = Symbol('not_found');
 export class HttpIncidentRepository {
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
+  private accessToken: string;
+  private refreshToken: string | undefined;
+  private actorId: string;
 
   constructor(private readonly options: HttpIncidentRepositoryOptions) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.fetchImpl = options.fetchImpl ?? ((...args) => fetch(...args));
+    this.accessToken = options.accessToken;
+    this.refreshToken = options.refreshToken;
+    this.actorId = options.actorId;
   }
 
   async getAll(): Promise<IncidentListResponseDto> {
@@ -57,6 +74,27 @@ export class HttpIncidentRepository {
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
       body: JSON.stringify(body),
     }, parseCreateIncidentResponse);
+  }
+
+  async executeAction(id: string, body: Readonly<Record<string, unknown>>, idempotencyKey: string): Promise<CreateIncidentResponseDto> {
+    const path = `/v1/incidents/${encodeURIComponent(id)}/actions`;
+    return this.request('action', path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+      body: JSON.stringify(body),
+    }, parseCreateIncidentResponse);
+  }
+
+  setSession(accessToken: string, actorId: string, refreshToken?: string): void {
+    this.accessToken = accessToken;
+    this.actorId = actorId;
+    this.refreshToken = refreshToken;
+  }
+
+  clearSession(): void {
+    this.accessToken = '';
+    this.actorId = '';
+    this.refreshToken = undefined;
   }
 
   private async request<T>(
@@ -83,7 +121,69 @@ export class HttpIncidentRepository {
     }
   }
 
-  private async send(path: string, init: RequestInit, notFoundAsNull: boolean): Promise<unknown> {
+  private async send(path: string, init: RequestInit, notFoundAsNull: boolean, retryCount = 0): Promise<unknown> {
+    try {
+      return await this.sendOnce(path, init, notFoundAsNull);
+    } catch (error) {
+      // Sólo 401 (sesión expirada) se renueva; 403 es falta de permiso y no se reintenta.
+      const expired = isIncidentApiError(error) && error.kind === 'UnauthorizedError' && error.status === 401;
+      if (!expired || retryCount > 0 || this.refreshToken === undefined) throw error;
+      const token = await this.refreshSession();
+      if (token === null) throw new IncidentApiError('UnauthorizedError', 401);
+      this.accessToken = token;
+      return this.send(path, init, notFoundAsNull, retryCount + 1);
+    }
+  }
+
+  private refreshSession(): Promise<string | null> {
+    if (sharedRefreshPromise === null) {
+      this.options.onSessionStateChange?.({ type: 'refreshing' });
+      // El finally se encadena una sola vez a la promesa compartida, así ningún
+      // solicitante tardío puede limpiar una renovación más nueva que la que esperaba.
+      sharedRefreshPromise = this.requestNewAccessToken().then((token) => {
+        if (token === null) {
+          this.options.onSessionStateChange?.({ type: 'expired' });
+        } else {
+          this.options.onSessionStateChange?.({
+            type: 'authenticated',
+            accessToken: token,
+            ...(this.refreshToken ? { refreshToken: this.refreshToken } : {}),
+          });
+        }
+        return token;
+      }).finally(() => {
+        sharedRefreshPromise = null;
+      });
+    }
+    return sharedRefreshPromise;
+  }
+
+  // Devuelve null ante cualquier falla: quien llama la convierte en UnauthorizedError.
+  private async requestNewAccessToken(): Promise<string | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    try {
+      const response = await this.fetchImpl(`${this.options.baseUrl}/v1/session/refresh`, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: this.refreshToken }),
+        signal: controller.signal,
+      });
+      if (!response.ok) return null;
+      const body: unknown = await response.json();
+      if (typeof body !== 'object' || body === null) return null;
+      const { accessToken, refreshToken } = body as Record<string, unknown>;
+      if (typeof accessToken !== 'string' || accessToken.length === 0) return null;
+      if (typeof refreshToken === 'string' && refreshToken.length > 0) this.refreshToken = refreshToken;
+      return accessToken;
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private async sendOnce(path: string, init: RequestInit, notFoundAsNull: boolean): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
@@ -115,8 +215,8 @@ export class HttpIncidentRepository {
   private headers(): Record<string, string> {
     return {
       Accept: 'application/json',
-      Authorization: `Bearer ${this.options.accessToken}`,
-      'X-Course-Actor': this.options.actorId,
+      Authorization: `Bearer ${this.accessToken}`,
+      'X-Course-Actor': this.actorId,
       ...(this.options.scenario ? { 'X-Course-Scenario': this.options.scenario } : {}),
     };
   }
