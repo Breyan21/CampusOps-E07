@@ -28,14 +28,33 @@
     },
     {
       "studentId": "Breyan21",
-      "commitShas": [],
-      "files": [],
+      "commitShas": [
+        "b82303dd54871706473519797601b04c02bb8083"
+      ],
+      "files": [
+        "App.tsx",
+        "src/application/auth/AuthService.ts",
+        "src/application/incidents/ExecuteIncidentAction.ts",
+        "src/domain/auth/permissions.ts",
+        "src/domain/auth/types.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "src/infrastructure/incidents/CampusOpsIncidentRepository.ts",
+        "src/ui/auth/LoginModal.tsx",
+        "src/ui/auth/SessionStatusBar.tsx",
+        "src/ui/incidents/IncidentDetailScreen.tsx",
+        "src/ui/incidents/IncidentListScreen.tsx",
+        "docs/session-state-machine.mmd"
+      ],
       "tests": [],
-      "reviews": [],
-      "prediction": "",
-      "command": "",
-      "observedResult": "",
-      "explanation": ""
+      "reviews": [
+        "Revisé que los permisos de la UI coincidan con el contrato: sólo reportantes pueden crear; sólo el técnico asignado puede iniciar o resolver; coordinación puede asignar, priorizar, cerrar y reabrir según el estado.",
+        "Revisé que las acciones también pasen por ExecuteIncidentAction y que una sesión nula no herede permisos de reportante.",
+        "Revisé que los estados de renovación del cliente actualicen la sesión visible y que un refresh fallido lleve a sesión expirada, requiriendo iniciar sesión otra vez."
+      ],
+      "prediction": "Al iniciar sin sesión, CampusOps pedirá autenticación y no mostrará operaciones protegidas. Tras elegir un perfil, la UI mostrará únicamente las acciones permitidas; las acciones incompatibles con el rol o la asignación serán rechazadas por el caso de uso. Un refresh exitoso restaurará el estado autenticado y uno fallido dejará la sesión expirada.",
+      "command": "npm run typecheck",
+      "observedResult": "npm run typecheck terminó sin errores. npm run lint terminó con 0 errores y una advertencia preexistente de no-require-imports en course-tests/cloud-client.test.ts:38. No ejecuté pruebas automatizadas para esta aportación.",
+      "explanation": "Implementé el flujo de perfiles y autorización para las pantallas y los casos de uso, conecté los cambios de estado del refresh con la barra de sesión y añadí el diagrama Mermaid. La revisión de permisos confirma que el perfil reportante es el único autorizado para crear según el backend; el técnico sólo puede iniciar o resolver su incidencia asignada, y coordinación dispone de asignación, prioridad, cierre y reapertura."
     },
     {
       "studentId": "MigueleArt",
