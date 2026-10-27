@@ -75,18 +75,67 @@ export function coordinateRefresh(events: readonly AuthEvent[]): Readonly<{
   return { status, activeGeneration, refreshCalls, retriedRequestIds, persistedToken };
 }
 
+function jsonEqual(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function resolveSync(
-  _base: SyncRecord,
-  _local: SyncRecord,
-  _remote: SyncRecord,
+  base: SyncRecord,
+  local: SyncRecord,
+  remote: SyncRecord,
 ): Readonly<{ kind: 'merged'; fields: JsonObject } | { kind: 'conflict'; fields: readonly string[] }> {
-  return pending('resolveSync');
+  const allKeys = new Set<string>([
+    ...Object.keys(base.fields),
+    ...Object.keys(local.fields),
+    ...Object.keys(remote.fields),
+  ]);
+  const sortedKeys = Array.from(allKeys).sort();
+
+  const conflicts: string[] = [];
+  const merged: Record<string, unknown> = {};
+
+  for (const key of sortedKeys) {
+    const baseVal = base.fields[key];
+    const localVal = local.fields[key];
+    const remoteVal = remote.fields[key];
+
+    const localChanged = !jsonEqual(localVal, baseVal);
+    const remoteChanged = !jsonEqual(remoteVal, baseVal);
+
+    if (localChanged && remoteChanged) {
+      if (jsonEqual(localVal, remoteVal)) {
+        merged[key] = localVal;
+      } else {
+        conflicts.push(key);
+      }
+    } else if (localChanged) {
+      merged[key] = localVal;
+    } else if (remoteChanged) {
+      merged[key] = remoteVal;
+    } else if (baseVal !== undefined) {
+      merged[key] = baseVal;
+    }
+  }
+
+  if (conflicts.length > 0) {
+    return { kind: 'conflict', fields: conflicts };
+  }
+
+  return { kind: 'merged', fields: merged };
 }
 
 export function deduplicateOperations<T extends Readonly<{ operationId: string }>>(
-  _operations: readonly T[],
+  operations: readonly T[],
 ): readonly T[] {
-  return pending('deduplicateOperations');
+  const seen = new Set<string>();
+  const deduplicated: T[] = [];
+  for (const op of operations) {
+    if (!seen.has(op.operationId)) {
+      seen.add(op.operationId);
+      deduplicated.push(op);
+    }
+  }
+  return deduplicated;
 }
 
 export function planRetry(_input: Readonly<{
