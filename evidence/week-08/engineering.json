@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 8,
-  "commitSha": "21a132cdcb23ec35ec25febbaaed26d0a1b0445f",
+  "commitSha": "24682b8341d3ef922da8871fbffc9dd1e62770ee",
   "decision": "Resolver la sincronización con una comparación de tres vías por campo entre snapshot base, estado local y estado remoto. Los cambios independientes se combinan; los cambios distintos sobre un mismo campo producen conflicto sin fusión parcial. Las operaciones se deduplican por operationId conservando la primera aparición y su orden.",
   "alternatives": [
     "Última escritura gana por fecha o versión: simple y automática, pero puede descartar una reasignación o acción local debido al orden de sincronización o a relojes inconsistentes.",
@@ -10,14 +10,22 @@
   ],
   "tradeoff": "Beneficio: conserva modificaciones locales y remotas, combina cambios independientes de forma determinista y detecta como conflicto un inicio local frente a una reasignación remota. La deduplicación evita repetir operaciones con la misma identidad sin alterar la cola original. Costo: los campos compuestos como work son atómicos, y la aplicación/UI debe presentar y resolver los conflictos; esta lógica no sustituye la confirmación HTTP 200 que controla el retiro de la cola.",
   "requirementIds": [
+    "AC-01",
     "AC-02",
-    "AC-04"
+    "AC-03",
+    "AC-04",
+    "AC-05"
   ],
   "verification": [
     {
       "command": "npm test -- --runInBand course-tests/public/week-08.test.ts course-tests/sync-resolution.test.ts",
       "result": "PASS: 2 suites y 9 pruebas aprobadas.",
       "evidence": "Jest confirmó los casos públicos de reasignación contra inicio, cambios independientes, conflicto del mismo campo y deduplicación, además de igualdad estructural, altas/bajas, no-mutación, orden estable e identidad de la primera operación."
+    },
+    {
+      "command": "npm test -- --ci --runInBand course-tests/sync-dispatcher.test.ts",
+      "result": "PASS: 1 suite y 3 pruebas aprobadas.",
+      "evidence": "Comprueba que SyncDispatcher retira operaciones de la cola SQLite únicamente tras recibir HTTP 200, conservando la cola intacta ante conflictos concurrentes o fallas de red."
     }
   ]
 }
