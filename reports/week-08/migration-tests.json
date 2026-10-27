@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "5f33c240841e4d450236c59bd83e6daba413cbc0",
+  "generatedAt": "2026-10-26T23:04:09.6169722-06:00",
+  "checks": [
+    {
+      "id": "migration_v1_to_v2_preserves_existing_data",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
+      "evidence": "La prueba migra la base v1 a v2, conserva el snapshot y la operación en cola y completa las fechas migradas; user_version termina en 2."
+    },
+    {
+      "id": "migration_failure_rolls_back_and_recovers",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
+      "evidence": "La falla inyectada después del primer ALTER TABLE deja user_version en 1, no conserva la columna agregada parcialmente y mantiene la operación; al reintentar, la migración llega a v2."
+    },
+    {
+      "id": "pending_operation_survives_database_reopen",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
+      "evidence": "Tras cerrar y reabrir el archivo SQLite, la operación y el snapshot recuperados coinciden con los valores persistidos."
+    },
+    {
+      "id": "replayed_operation_id_keeps_first_payload",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
+      "evidence": "Al encolar dos veces el mismo operationId con payload y versión base diferentes, se conserva la primera operación y queda una sola fila."
+    }
+  ]
+}
