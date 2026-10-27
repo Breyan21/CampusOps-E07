@@ -75,67 +75,109 @@ export function coordinateRefresh(events: readonly AuthEvent[]): Readonly<{
   return { status, activeGeneration, refreshCalls, retriedRequestIds, persistedToken };
 }
 
-function jsonEqual(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
 export function resolveSync(
   base: SyncRecord,
   local: SyncRecord,
   remote: SyncRecord,
 ): Readonly<{ kind: 'merged'; fields: JsonObject } | { kind: 'conflict'; fields: readonly string[] }> {
-  const allKeys = new Set<string>([
+  const fieldNames = [...new Set([
     ...Object.keys(base.fields),
     ...Object.keys(local.fields),
     ...Object.keys(remote.fields),
-  ]);
-  const sortedKeys = Array.from(allKeys).sort();
-
+  ])].sort();
   const conflicts: string[] = [];
-  const merged: Record<string, unknown> = {};
+  const mergedEntries: [string, unknown][] = [];
 
-  for (const key of sortedKeys) {
-    const baseVal = base.fields[key];
-    const localVal = local.fields[key];
-    const remoteVal = remote.fields[key];
+  for (const field of fieldNames) {
+    const baseHasField = Object.prototype.hasOwnProperty.call(base.fields, field);
+    const localHasField = Object.prototype.hasOwnProperty.call(local.fields, field);
+    const remoteHasField = Object.prototype.hasOwnProperty.call(remote.fields, field);
+    const localChanged = !sameFieldValue(
+      baseHasField,
+      base.fields[field],
+      localHasField,
+      local.fields[field],
+    );
+    const remoteChanged = !sameFieldValue(
+      baseHasField,
+      base.fields[field],
+      remoteHasField,
+      remote.fields[field],
+    );
 
-    const localChanged = !jsonEqual(localVal, baseVal);
-    const remoteChanged = !jsonEqual(remoteVal, baseVal);
+    if (
+      localChanged
+      && remoteChanged
+      && !sameFieldValue(localHasField, local.fields[field], remoteHasField, remote.fields[field])
+    ) {
+      conflicts.push(field);
+      continue;
+    }
 
-    if (localChanged && remoteChanged) {
-      if (jsonEqual(localVal, remoteVal)) {
-        merged[key] = localVal;
-      } else {
-        conflicts.push(key);
-      }
-    } else if (localChanged) {
-      merged[key] = localVal;
-    } else if (remoteChanged) {
-      merged[key] = remoteVal;
-    } else if (baseVal !== undefined) {
-      merged[key] = baseVal;
+    const useLocal = localChanged;
+    const hasMergedField = useLocal ? localHasField : remoteHasField;
+    if (hasMergedField) {
+      mergedEntries.push([field, useLocal ? local.fields[field] : remote.fields[field]]);
     }
   }
 
-  if (conflicts.length > 0) {
-    return { kind: 'conflict', fields: conflicts };
-  }
-
-  return { kind: 'merged', fields: merged };
+  return conflicts.length > 0
+    ? { kind: 'conflict', fields: conflicts }
+    : { kind: 'merged', fields: Object.fromEntries(mergedEntries) };
 }
 
 export function deduplicateOperations<T extends Readonly<{ operationId: string }>>(
   operations: readonly T[],
 ): readonly T[] {
   const seen = new Set<string>();
-  const deduplicated: T[] = [];
-  for (const op of operations) {
-    if (!seen.has(op.operationId)) {
-      seen.add(op.operationId);
-      deduplicated.push(op);
+  const unique: T[] = [];
+
+  for (const operation of operations) {
+    if (!seen.has(operation.operationId)) {
+      seen.add(operation.operationId);
+      unique.push(operation);
     }
   }
-  return deduplicated;
+
+  return unique;
+}
+
+function sameFieldValue(
+  leftExists: boolean,
+  left: unknown,
+  rightExists: boolean,
+  right: unknown,
+): boolean {
+  return leftExists === rightExists && (!leftExists || areJsonValuesEqual(left, right));
+}
+
+function areJsonValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => areJsonValuesEqual(value, right[index]));
+  }
+  if (
+    left === null
+    || right === null
+    || typeof left !== 'object'
+    || typeof right !== 'object'
+  ) {
+    return false;
+  }
+
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key) => (
+      Object.prototype.hasOwnProperty.call(right, key)
+      && areJsonValuesEqual(
+        (left as Record<string, unknown>)[key],
+        (right as Record<string, unknown>)[key],
+      )
+    ));
 }
 
 export function planRetry(_input: Readonly<{
