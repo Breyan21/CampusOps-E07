@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "week": 8,
-  "commitSha": "5f33c240841e4d450236c59bd83e6daba413cbc0",
-  "generatedAt": "2026-10-26T23:04:09.6169722-06:00",
+  "commitSha": "24682b8341d3ef922da8871fbffc9dd1e62770ee",
+  "generatedAt": "2026-10-27T00:00:00.000Z",
   "checks": [
     {
       "id": "migration_v1_to_v2_preserves_existing_data",
@@ -31,6 +31,34 @@
       "scenarioType": "boundary",
       "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
       "evidence": "Al encolar dos veces el mismo operationId con payload y versión base diferentes, se conserva la primera operación y queda una sola fila."
+    },
+    {
+      "id": "resolve_sync_conflict_detected_and_queue_retained",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/sync-dispatcher.test.ts course-tests/sync-resolution.test.ts",
+      "evidence": "resolveSync detecta conflicto cuando coinciden ediciones en el mismo campo; SyncDispatcher retiene la operación en cola SQLite sin descartarla ante conflicto 409."
+    },
+    {
+      "id": "resolve_sync_merges_independent_fields",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-08.test.ts",
+      "evidence": "Cambios independientes entre local y remoto se combinan exitosamente en un único estado resultante sin pérdida de campos."
+    },
+    {
+      "id": "deduplicate_operations_stable_identity",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-08.test.ts",
+      "evidence": "deduplicateOperations preserva el orden original e identidad de la primera operación ante identificadores duplicados, sin mutar el array de entrada."
+    },
+    {
+      "id": "confirmed_sync_removes_from_queue",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/sync-dispatcher.test.ts",
+      "evidence": "SyncDispatcher retira la operación de la cola local SQLite únicamente al recibir confirmación exitosa HTTP 200 del servidor."
     }
   ]
 }
