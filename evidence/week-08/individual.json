@@ -27,14 +27,24 @@
     },
     {
       "studentId": "Breyan21",
-      "commitShas": [],
-      "files": [],
-      "tests": [],
+      "commitShas": [
+        "1877dbef772fdfc63304f6d53bfdc6d92cf22eb1"
+      ],
+      "files": [
+        "src/course-evaluation/index.ts",
+        "course-tests/sync-resolution.test.ts",
+        "docs/sync-policy.md",
+        "evidence/week-08/engineering.json"
+      ],
+      "tests": [
+        "course-tests/public/week-08.test.ts",
+        "course-tests/sync-resolution.test.ts"
+      ],
       "reviews": [],
-      "prediction": "",
-      "command": "",
-      "observedResult": "",
-      "explanation": ""
+      "prediction": "Los cambios simultáneos en campos distintos se combinarán; si la reasignación remota y el inicio local modifican el mismo campo compuesto work, resolveSync informará un conflicto sin mutar los registros. Las operaciones repetidas con operationId idéntico conservarán únicamente la primera aparición y el orden original.",
+      "command": "npm test -- --runInBand course-tests/public/week-08.test.ts course-tests/sync-resolution.test.ts",
+      "observedResult": "Jest aprobó las 2 suites y las 9 pruebas. npm run typecheck terminó correctamente. ESLint terminó sin errores; reportó una advertencia preexistente de require() en course-tests/cloud-client.test.ts.",
+      "explanation": "Implementé la fusión de tres vías por campo con igualdad estructural de valores JSON, incluyendo altas y eliminaciones, para combinar cambios independientes y reportar de forma estable todos los campos conflictivos. Implementé la deduplicación estable por operationId que preserva la primera operación y no altera la entrada. Añadí pruebas de regresión para conflictos, fusiones, no-mutación, orden y deduplicación, y documenté la política y sus trade-offs."
     },
     {
       "studentId": "MigueleArt",
