@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "21a132cdcb23ec35ec25febbaaed26d0a1b0445f",
+  "decision": "Resolver la sincronización con una comparación de tres vías por campo entre snapshot base, estado local y estado remoto. Los cambios independientes se combinan; los cambios distintos sobre un mismo campo producen conflicto sin fusión parcial. Las operaciones se deduplican por operationId conservando la primera aparición y su orden.",
+  "alternatives": [
+    "Última escritura gana por fecha o versión: simple y automática, pero puede descartar una reasignación o acción local debido al orden de sincronización o a relojes inconsistentes.",
+    "Rechazar toda divergencia entre local y remoto: evita sobrescrituras, pero obliga a resolver manualmente incluso cambios en campos independientes.",
+    "Fusión de tres vías por campo (elegida): combina cambios independientes y deja explícita la colisión del mismo campo; requiere resolución humana para conflictos y trata cada campo de primer nivel como unidad."
+  ],
+  "tradeoff": "Beneficio: conserva modificaciones locales y remotas, combina cambios independientes de forma determinista y detecta como conflicto un inicio local frente a una reasignación remota. La deduplicación evita repetir operaciones con la misma identidad sin alterar la cola original. Costo: los campos compuestos como work son atómicos, y la aplicación/UI debe presentar y resolver los conflictos; esta lógica no sustituye la confirmación HTTP 200 que controla el retiro de la cola.",
+  "requirementIds": [
+    "AC-02",
+    "AC-04"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- --runInBand course-tests/public/week-08.test.ts course-tests/sync-resolution.test.ts",
+      "result": "PASS: 2 suites y 9 pruebas aprobadas.",
+      "evidence": "Jest confirmó los casos públicos de reasignación contra inicio, cambios independientes, conflicto del mismo campo y deduplicación, además de igualdad estructural, altas/bajas, no-mutación, orden estable e identidad de la primera operación."
+    }
+  ]
+}

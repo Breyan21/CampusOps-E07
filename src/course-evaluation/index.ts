@@ -76,17 +76,108 @@ export function coordinateRefresh(events: readonly AuthEvent[]): Readonly<{
 }
 
 export function resolveSync(
-  _base: SyncRecord,
-  _local: SyncRecord,
-  _remote: SyncRecord,
+  base: SyncRecord,
+  local: SyncRecord,
+  remote: SyncRecord,
 ): Readonly<{ kind: 'merged'; fields: JsonObject } | { kind: 'conflict'; fields: readonly string[] }> {
-  return pending('resolveSync');
+  const fieldNames = [...new Set([
+    ...Object.keys(base.fields),
+    ...Object.keys(local.fields),
+    ...Object.keys(remote.fields),
+  ])].sort();
+  const conflicts: string[] = [];
+  const mergedEntries: [string, unknown][] = [];
+
+  for (const field of fieldNames) {
+    const baseHasField = Object.prototype.hasOwnProperty.call(base.fields, field);
+    const localHasField = Object.prototype.hasOwnProperty.call(local.fields, field);
+    const remoteHasField = Object.prototype.hasOwnProperty.call(remote.fields, field);
+    const localChanged = !sameFieldValue(
+      baseHasField,
+      base.fields[field],
+      localHasField,
+      local.fields[field],
+    );
+    const remoteChanged = !sameFieldValue(
+      baseHasField,
+      base.fields[field],
+      remoteHasField,
+      remote.fields[field],
+    );
+
+    if (
+      localChanged
+      && remoteChanged
+      && !sameFieldValue(localHasField, local.fields[field], remoteHasField, remote.fields[field])
+    ) {
+      conflicts.push(field);
+      continue;
+    }
+
+    const useLocal = localChanged;
+    const hasMergedField = useLocal ? localHasField : remoteHasField;
+    if (hasMergedField) {
+      mergedEntries.push([field, useLocal ? local.fields[field] : remote.fields[field]]);
+    }
+  }
+
+  return conflicts.length > 0
+    ? { kind: 'conflict', fields: conflicts }
+    : { kind: 'merged', fields: Object.fromEntries(mergedEntries) };
 }
 
 export function deduplicateOperations<T extends Readonly<{ operationId: string }>>(
-  _operations: readonly T[],
+  operations: readonly T[],
 ): readonly T[] {
-  return pending('deduplicateOperations');
+  const seen = new Set<string>();
+  const unique: T[] = [];
+
+  for (const operation of operations) {
+    if (!seen.has(operation.operationId)) {
+      seen.add(operation.operationId);
+      unique.push(operation);
+    }
+  }
+
+  return unique;
+}
+
+function sameFieldValue(
+  leftExists: boolean,
+  left: unknown,
+  rightExists: boolean,
+  right: unknown,
+): boolean {
+  return leftExists === rightExists && (!leftExists || areJsonValuesEqual(left, right));
+}
+
+function areJsonValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => areJsonValuesEqual(value, right[index]));
+  }
+  if (
+    left === null
+    || right === null
+    || typeof left !== 'object'
+    || typeof right !== 'object'
+  ) {
+    return false;
+  }
+
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key) => (
+      Object.prototype.hasOwnProperty.call(right, key)
+      && areJsonValuesEqual(
+        (left as Record<string, unknown>)[key],
+        (right as Record<string, unknown>)[key],
+      )
+    ));
 }
 
 export function planRetry(_input: Readonly<{
