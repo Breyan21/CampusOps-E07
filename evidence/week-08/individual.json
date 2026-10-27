@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "teamId": "equipo07",
+  "members": [
+    {
+      "studentId": "Laloaobes",
+      "commitShas": [
+        "5f33c240841e4d450236c59bd83e6daba413cbc0"
+      ],
+      "files": [
+        "src/infrastructure/storage/OperationQueueStorage.ts",
+        "course-tests/storage/operation-queue.test.ts",
+        "docs/data-model.md",
+        "package.json",
+        "package-lock.json",
+        "app.json"
+      ],
+      "tests": [
+        "course-tests/storage/operation-queue.test.ts"
+      ],
+      "reviews": [],
+      "prediction": "Si una operación se guarda sin conexión y se cierra/reabre la base SQLite, se recuperarán el mismo operationId, payload y versión base. Si una migración de v1 a v2 falla a mitad de camino, la transacción dejará user_version en 1 y permitirá reintentar sin perder la operación pendiente.",
+      "command": "npm test -- --ci --runInBand course-tests/storage/operation-queue.test.ts",
+      "observedResult": "Las 5 pruebas de almacenamiento pasaron: migración v1 a v2 con conservación de datos, rollback tras una falla inyectada y recuperación al reintentar, persistencia tras cerrar y reabrir, conservación de la primera operación repetida y rechazo de entradas inválidas. npm run typecheck pasó y ESLint no reportó errores en los archivos TypeScript modificados.",
+      "explanation": "Implementé almacenamiento duradero de snapshots y operaciones pendientes con expo-sqlite, esquema versionado hasta v2 y migraciones exclusivas para que DDL, datos y user_version se reviertan juntos ante errores. Añadí pruebas con SQLite real que verifican rollback, recuperación, persistencia después de reabrir y deduplicación por operationId; documenté el modelo y los límites de responsabilidad de esta capa."
+    },
+    {
+      "studentId": "Breyan21",
+      "commitShas": [],
+      "files": [],
+      "tests": [],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    },
+    {
+      "studentId": "MigueleArt",
+      "commitShas": [],
+      "files": [],
+      "tests": [],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    }
+  ]
+}
