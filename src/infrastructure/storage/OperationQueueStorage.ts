@@ -221,6 +221,15 @@ export class OperationQueueStorage {
     };
   }
 
+  async removeOperation(operationId: string): Promise<boolean> {
+    assertNonEmpty('operationId', operationId);
+    await this.database.runAsync(
+      'DELETE FROM operation_queue WHERE operation_id = ?',
+      [operationId],
+    );
+    return true;
+  }
+
   async close(): Promise<void> {
     await this.database.closeAsync();
   }
