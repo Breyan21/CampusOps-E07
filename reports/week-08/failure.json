@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "mode": "evidence",
+  "commitSha": "21a132cdcb23ec35ec25febbaaed26d0a1b0445f",
+  "evaluatedAt": "2026-10-27T05:20:11.166638+00:00",
+  "status": "fail",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "pass",
+      "detail": "hits=[]"
+    },
+    {
+      "id": "required_evidence",
+      "status": "fail",
+      "detail": "missing/empty=['docs/sync-policy.md', 'evidence/week-08/engineering.json']"
+    },
+    {
+      "id": "schema:reports/week-08/migration-tests.json",
+      "status": "pass",
+      "detail": "4 checks indexed, 3 boundary/failure; evidence-only commit; invalid changes=[]"
+    },
+    {
+      "id": "schema:evidence/week-08/individual.json",
+      "status": "fail",
+      "detail": "Breyan21: at least one authored commit SHA is required"
+    },
+    {
+      "id": "frozen_sha",
+      "status": "pass",
+      "detail": "tag=week-08-final tagSha=21a132cdcb23ec35ec25febbaaed26d0a1b0445f head=21a132cdcb23ec35ec25febbaaed26d0a1b0445f"
+    }
+  ]
+}
