@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "1451e366878304dd21e4111795a23d077d7aa7d9",
+  "decision": "Reintentar exclusivamente operaciones GET ante errores recuperables (408, 425, 429, 5xx, timeout) con backoff exponencial acotado a 4 intentos máximo y respeto estricto a Retry-After según RFC 7231 (delay-seconds). Permitir reintento de POST únicamente cuando exista una Idempotency-Key estable y no vacía, conservando la misma clave y el mismo cuerpo JSON en cada intento para evitar efectos duplicados. Ante fallo terminal del proveedor de geocodificación, activar fallback a ubicación manual sin inventar coordenadas. Nunca almacenar errores ni fallbacks como resultados válidos en caché.",
+  "alternatives": [
+    "Reintentos ilimitados con backoff: Sigue intentando indefinidamente ante cualquier error recuperable. Evita pérdidas de operación por fallas transitorias cortas, pero puede causar bucles infinitos, saturar el servidor y bloquear la UI durante períodos arbitrarios. No cumple el contrato de límite de 4 intentos publicado.",
+    "Reintentar también POST sin Idempotency-Key: Simplifica la lógica del cliente al no requerir clave estable, pero introduce el riesgo de duplicar operaciones de escritura cuando la respuesta se pierde tras el guardado en servidor. Inaceptable para el dominio de incidencias donde un solo cierre/resolución debe aplicarse exactamente una vez.",
+    "Fallback a coordenadas aproximadas o por defecto: Ante fallo del geocodificador, asigna coordenadas genéricas (por ejemplo 0,0) o del último resultado conocido. Permite mantener el flujo de creación con datos geográficos, pero introduce datos georreferenciados falsos que pueden engañar al sistema de asignación de técnicos y al análisis de incidencias."
+  ],
+  "tradeoff": "El límite de 4 intentos previene bucles y saturación pero puede dejar sin completar una operación en una red degradada durante mucho tiempo. El fallback manual conserva la integridad del dato geográfico a costo de no tener coordenadas. La exigencia de Idempotency-Key en POST impone disciplina al cliente (requiere generar y conservar claves estables) pero garantiza exactamente un efecto persistido incluso ante respuestas perdidas. El backoff determinista sin jitter facilita pruebas reproducibles pero no distribuye la carga ante muchos clientes concurrentes.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- --ci --runInBand course-tests/public/week-09.test.ts",
+      "result": "PASS: 4 pruebas aprobadas. selectIncidentLocation valida coordenadas y fallback manual; planRetry respeta Retry-After, limita intentos y bloquea POST sin clave.",
+      "evidence": "Tests públicos: CampusOps accepts valid geocoding; can retry lost resolution only with stable operation key; retries bounded and honors Retry-After; does not retry POST without stable idempotency identity. Todos PASS."
+    },
+    {
+      "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts course-tests/resilience/week-09-lost-response.test.ts",
+      "result": "PASS: 13 pruebas aprobadas en 2 suites. GeocodingService: caché normalizada, fallback ante 429/timeout/datos inválidos. HttpIncidentRepository: Retry-After RFC 7231, idempotencia POST, límite 4 intentos, respuesta perdida con cero duplicados.",
+      "evidence": "Suite week-09-resilience-core: 8 PASS. Suite week-09-lost-response: 5 PASS. historyLog.length=1 ante respuesta perdida confirma cero duplicados. callCount=4 confirma límite estricto. Retry-After '0.05' interpretado como 50ms, no 50000ms."
+    },
+    {
+      "command": "npm run typecheck",
+      "result": "PASS: tsc --noEmit sin errores. Corrección de exactOptionalPropertyTypes en HttpIncidentRepository (spreads condicionales para retryAfterMs e idempotencyKey). Corrección de GeocodingService (propiedad scenario declarada como string | undefined).",
+      "evidence": "Antes del fix: 3 errores TS2379 y TS2412. Después del fix: 0 errores. npm run typecheck: sin salida de error, código de salida 0."
+    }
+  ]
+}
+

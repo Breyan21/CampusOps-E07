@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "mode": "verify",
+  "commitSha": "1451e366878304dd21e4111795a23d077d7aa7d9",
+  "evaluatedAt": "2026-11-03T02:19:54.066467+00:00",
+  "status": "pass",
+  "checks": [
+    {
+      "id": "base_files",
+      "status": "pass",
+      "detail": "missing=[]"
+    },
+    {
+      "id": "react_native_profile",
+      "status": "pass",
+      "detail": "missing packages=[]"
+    },
+    {
+      "id": "toolchain_scripts",
+      "status": "pass",
+      "detail": "missing scripts=[]"
+    },
+    {
+      "id": "workflow_integrity",
+      "status": "pass",
+      "detail": "bypass markers=[]"
+    },
+    {
+      "id": "secret_scan",
+      "status": "pass",
+      "detail": "hits=[]"
+    },
+    {
+      "id": "toolchain_1",
+      "status": "pass",
+      "detail": "npm run typecheck\n> dmi-react-native-starter@1.0.0 typecheck\n> tsc --noEmit"
+    },
+    {
+      "id": "toolchain_2",
+      "status": "pass",
+      "detail": "npm run lint\n> dmi-react-native-starter@1.0.0 lint\n> eslint .\n\n\nC:\\Users\\jmigu\\Documents\\UTT\\10MO CUATRI\\DesarrolloMovilIntegral\\CampusOps-E07\\course-tests\\cloud-client.test.ts\n  38:19  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports\n\nâœ– 1 problem (0 errors, 1 warning)"
+    },
+    {
+      "id": "toolchain_3",
+      "status": "pass",
+      "detail": "npm run audit:ci\nse for empty merge sources - https://github.com/advisories/GHSA-2883-xcg3-v3hh\nfix available via `npm audit fix`\nnode_modules/@expo/xcpretty/node_modules/js-yaml\nnode_modules/js-yaml\n\nminimatch  <11.0.1\nSeverity: moderate\nminimatch has potential denial of service via globparts amplification - https://github.com/advisories/GHSA-g3hv-75wg-m249\nfix available via `npm audit fix --force`\nWill install expo@51.0.39, which is a breaking change\nnode_modules/@expo/fingerprint/node_modules/minimatch\nnode_modules/glob/node_modules/minimatch\nnode_modules/minimatch\n\nnode-forge  <=1.4.0\nSeverity: high\nnode-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements - https://github.com/advisories/GHSA-86w9-cpqp-85rv\nForge: ASN.1 OID first arc truncation in asn1.oidToDer - https://github.com/advisories/GHSA-4642-5mcj-2rqw\nForge: Prototype Pollution in forge.http cookie handling via a malicious Set-Cookie - https://github.com/advisories/GHSA-6wvx-3r32-xmcg\nForge: TLS client crash when the server sends no certificate - https://github.com/advisories/GHSA-525v-9gp9-w22h\nForge: Regular expression denial of service in PEM decoding (pem.decode) - https://github.com/advisories/GHSA-7wch-p9px-956x\nForge: Denial of Service via infinite loop in BigInteger.modInverse() with negative input (incomplete fix of CVE-2026-33891) - https://github.com/advisories/GHSA-h6cr-wjv9-3cpp\nForge: verifyCertificateChain() removes trusted CA certificates with the same subject from the CA store - https://github.com/advisories/GHSA-4487-j8r4-4g2f\nForge: AES-GCM authentication bypass via unvalidated tagLength option - https://github.com/advisories/GHSA-5cwg-6vw7-rj6p\nForge: PKCS#12 MAC forgery and constant-key PBE via zero iteration count - https://github.com/advisories/GHSA-jc66-7q78-782g\nForge: Denial of service in TLS record processing via a record interleaved with a fragmented handshake message - https://github.com/advisories/GHSA-8hrf-8g6f-7xwp\nForge: Denial of service in TLS record processing via call stack exhaustion - https://github.com/advisories/GHSA-hqq3-7jhf-c5jx\nForge: X.509 basicConstraints bypass in verifyCertificateChain() via deprecated extension OIDs 2.5.29.10 and 2.5.29.13 - https://github.com/advisories/GHSA-5x38-2vff-x55p\nfix available via `npm audit fix`\nnode_modules/node-forge\n\nsource-map-js  1.0.0 - 1.2.1\nSeverity: high\nsource-map-js allows event-loop denial of service through indexed source-map section offsets - https://github.com/advisories/GHSA-68fv-2mgg-jv7q\nfix available via `npm audit fix`\nnode_modules/source-map-js\n\nzod  <4.6.6\nSeverity: high\nZod can exhaust memory while validating oversized constrained collections - https://github.com/advisories/GHSA-mrhx-c7xc-m3w5\nfix available via `npm audit fix`\nnode_modules/expo/node_modules/zod\n\n26 vulnerabilities (1 low, 17 moderate, 8 high)\n\nTo address issues that do not require attention, run:\n  npm audit fix\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force"
+    },
+    {
+      "id": "toolchain_4",
+      "status": "pass",
+      "detail": "npm run test:smoke\n> dmi-react-native-starter@1.0.0 test:smoke\n> jest --no-watchman --cacheDirectory .jest-cache --ci --runInBand course-tests/smoke.test.tsx\n\n  console.warn\n    SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context\n\n    \u001b[0m \u001b[90m 85 |\u001b[39m\n     \u001b[90m 86 |\u001b[39m   \u001b[36mreturn\u001b[39m (\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 87 |\u001b[39m     \u001b[33m<\u001b[39m\u001b[33mSafeAreaView\u001b[39m style\u001b[33m=\u001b[39m{styles\u001b[33m.\u001b[39mscreen}\u001b[33m>\u001b[39m\n     \u001b[90m    |\u001b[39m      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 88 |\u001b[39m       \u001b[33m<\u001b[39m\u001b[33mSessionStatusBar\u001b[39m\n     \u001b[90m 89 |\u001b[39m         state\u001b[33m=\u001b[39m{sessionState}\n     \u001b[90m 90 |\u001b[39m         actorId\u001b[33m=\u001b[39m{currentActorId}\u001b[0m\n\n      at warn (node_modules/react-native/Libraries/Utilities/warnOnce.js:27:11)\n      at Object.warnOnce [as SafeAreaView] (node_modules/react-native/index.js:101:5)\n      at SafeAreaView (App.tsx:87:6)\n      at Object.react_stack_bottom_frame (node_modules/react-reconciler/cjs/react-reconciler.development.js:17596:20)\n      at renderWithHooks (node_modules/react-reconciler/cjs/react-reconciler.development.js:5335:22)\n      at updateFunctionComponent (node_modules/react-reconciler/cjs/react-reconciler.development.js:7720:19)\n      at beginWork (node_modules/react-reconciler/cjs/react-reconciler.development.js:9277:18)\n      at runWithFiberInDEV (node_modules/react-reconciler/cjs/react-reconciler.development.js:2508:13)\n      at performUnitOfWork (node_modules/react-reconciler/cjs/react-reconciler.development.js:15273:22)\n      at workLoopSync (node_modules/react-reconciler/cjs/react-reconciler.development.js:15099:41)\n      at renderRootSync (node_modules/react-reconciler/cjs/react-reconciler.development.js:15080:11)\n      at performWorkOnRoot (node_modules/react-reconciler/cjs/react-reconciler.development.js:14165:11)\n      at performWorkOnRootViaSchedulerTask (node_modules/react-reconciler/cjs/react-reconciler.development.js:3335:7)\n      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)\n      at node_modules/react/cjs/react.development.js:847:21\n\n\nPASS course-tests/smoke.test.tsx\n  âˆš renders the reproducible baseline and resolves backend state (1940 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       1 passed, 1 total\nSnapshots:   0 total\nTime:        4.912 s, estimated 5 s\nRan all test suites matching /course-tests\\\\smoke.test.tsx/i."
+    },
+    {
+      "id": "toolchain_5",
+      "status": "pass",
+      "detail": "npm run backend:self-test\n> dmi-react-native-starter@1.0.0 backend:self-test\n> node course-backend/self-test.mjs\n\nCampusOps backend contracts: roles, reassignment conflict, lost response, idempotency, evidence and geocoding PASS.\nControlled backend self-test passed."
+    }
+  ]
+}

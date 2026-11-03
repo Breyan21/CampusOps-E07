@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "1451e366878304dd21e4111795a23d077d7aa7d9",
+  "generatedAt": "2026-11-03T02:16:00Z",
+  "checks": [
+    {
+      "id": "rate-limited-429-fallback-manual",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts",
+      "evidence": "GeocodingService ante HTTP 429 devuelve { source: 'manual', label: '...' } sin latitude ni longitude; el valor no se almacena en caché. Test: 'aplica fallback a manual ante respuesta 429 sin inventar coordenadas ni guardar en caché' PASS."
+    },
+    {
+      "id": "timeout-and-disconnect-fallback-manual",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
+      "evidence": "GeocodingService captura AbortError y errores de red; devuelve { source: 'manual' } sin coordenadas en escenarios de timeout, desconexión (socket destroy) y datos inválidos. Test: 'aplica fallback a manual sin inventar coordenadas ante 429, timeout, desconexión y datos inválidos' PASS."
+    },
+    {
+      "id": "invalid-coordinates-fallback-manual",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts",
+      "evidence": "GeocodingService ante coordenadas fuera de rango (latitude=999, longitude=null) evalúa con selectIncidentLocation y devuelve { source: 'manual', label: '...' }. Test: 'aplica fallback a manual ante coordenadas corruptas o fuera de rango' PASS."
+    },
+    {
+      "id": "cache-hit-avoids-second-network-request",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
+      "evidence": "GeocodingService resuelve la segunda consulta idéntica (variación de case/espacios) desde caché en memoria; mockFetch invocado 1 sola vez. hasCached('Biblioteca Central')=true. Test: 'evita una segunda llamada de red gracias a la caché por consulta normalizada' PASS."
+    },
+    {
+      "id": "no-errors-cached-as-valid-results",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
+      "evidence": "Tras escenarios de 429, timeout, desconexión y datos inválidos, getCacheSize()=0 y hasCached para cada consulta es false. Ningún error se almacena como resultado válido. Test: 'aplica fallback a manual sin inventar coordenadas ante 429, timeout, desconexión y datos inválidos' PASS."
+    },
+    {
+      "id": "lost-response-single-effect-no-duplicates",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
+      "evidence": "Doble controlado simula que el servidor persiste la operación (version=2, status=resolved, historyLog.length=1) pero destruye el socket antes de responder. El reintento con la misma Idempotency-Key recibe duplicate=true. historyLog.length=1, incidentVersion=2. Test: 'persiste un único efecto cuando la respuesta se pierde tras el guardado' PASS."
+    },
+    {
+      "id": "idempotent-retry-same-key",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts course-tests/resilience/week-09-lost-response.test.ts",
+      "evidence": "En POST con AbortError en intento 1, HttpIncidentRepository reintenta con la misma Idempotency-Key. capturedKeys[0] === capturedKeys[1] === 'resolve-op-lost-resp-007'. callCount=2. Tests de idempotencia PASS."
+    },
+    {
+      "id": "retry-limit-max-4-attempts-no-fifth",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts course-tests/week-09-resilience-core.test.ts",
+      "evidence": "Ante 503 permanente, HttpIncidentRepository realiza exactamente 4 llamadas de red (intento 1 + 3 reintentos) y lanza IncidentApiError. callCount=4 verificado. Test: 'respeta el límite estricto de 4 intentos como máximo' PASS. Test: 'no reintenta solicitudes que exceden el límite de 3 reintentos (intento 4 aborta)' PASS."
+    },
+    {
+      "id": "retry-after-rfc7231-seconds-respected",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts course-tests/week-09-resilience-core.test.ts",
+      "evidence": "Retry-After: '0.05' (0.05 segundos = 50ms) es interpretado como delay en segundos conforme a RFC 7231. El reintento ocurre >=40ms después (delta medido en segundCallTime - firstCallTime). Antes del fix, '50' era tratado como segundos (50000ms) causando timeout. Tests: 'respeta el encabezado Retry-After en segundos según el estándar HTTP RFC 7231' y 'reintenta automáticamente ante un error 429 respetando Retry-After' PASS."
+    }
+  ]
+}
+
