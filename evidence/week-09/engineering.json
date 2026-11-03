@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "1498535892b50b2c0a09bf22b09d4b2ed4d29a31",
+  "commitSha": "e14c10e1836c48a63b720256e7a3affdf56a33fe",
   "decision": "Reintentar exclusivamente operaciones GET ante errores recuperables (408, 425, 429, 5xx, timeout) con backoff exponencial acotado a 4 intentos máximo y respeto estricto a Retry-After según RFC 7231 (delay-seconds). Permitir reintento de POST únicamente cuando exista una Idempotency-Key estable y no vacía, conservando la misma clave y el mismo cuerpo JSON en cada intento para evitar efectos duplicados. Ante fallo terminal del proveedor de geocodificación, activar fallback a ubicación manual sin inventar coordenadas. Nunca almacenar errores ni fallbacks como resultados válidos en caché.",
   "alternatives": [
     "Reintentos ilimitados con backoff: Sigue intentando indefinidamente ante cualquier error recuperable. Evita pérdidas de operación por fallas transitorias cortas, pero puede causar bucles infinitos, saturar el servidor y bloquear la UI durante períodos arbitrarios. No cumple el contrato de límite de 4 intentos publicado.",
@@ -24,8 +24,8 @@
     },
     {
       "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts course-tests/resilience/week-09-lost-response.test.ts",
-      "result": "PASS: 13 pruebas aprobadas en 2 suites. GeocodingService: caché normalizada, fallback ante 429/timeout/datos inválidos. HttpIncidentRepository: Retry-After RFC 7231, idempotencia POST, límite 4 intentos, respuesta perdida con cero duplicados.",
-      "evidence": "Suite week-09-resilience-core: 8 PASS. Suite week-09-lost-response: 5 PASS. historyLog.length=1 ante respuesta perdida confirma cero duplicados. callCount=4 confirma límite estricto. Retry-After '0.05' interpretado como 50ms, no 50000ms."
+      "result": "PASS: 13 pruebas aprobadas en 2 suites (8 core + 5 lost-response).",
+      "evidence": "Suite week-09-resilience-core: 8 PASS. Suite week-09-lost-response: 5 PASS. historyLog.length=1 ante respuesta perdida confirma cero duplicados. callCount=4 confirma límite estricto. Retry-After entero 1s es respetado."
     },
     {
       "command": "npm run typecheck",
@@ -34,4 +34,3 @@
     }
   ]
 }
-

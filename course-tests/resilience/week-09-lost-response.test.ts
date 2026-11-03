@@ -130,11 +130,11 @@ describe('Semana 09 - Integrante 3 (MigueleArt): Calidad, Resiliencia y Respuest
         networkCallCount++;
         if (networkCallCount === 1) {
           firstCallTime = Date.now();
-          // Retry-After de 0.05 segundos = 50ms
+          // Retry-After usa delay-seconds enteros conforme a HTTP.
           return {
             ok: false,
             status: 429,
-            headers: new Headers({ 'retry-after': '0.05' }),
+            headers: new Headers({ 'retry-after': '1' }),
             json: async () => ({ code: 'rate_limited' }),
           };
         }
@@ -158,7 +158,7 @@ describe('Semana 09 - Integrante 3 (MigueleArt): Calidad, Resiliencia y Respuest
       const result = await repo.getAll();
       expect(result.items).toEqual([]);
       expect(networkCallCount).toBe(2);
-      expect(secondCallTime - firstCallTime).toBeGreaterThanOrEqual(40);
+      expect(secondCallTime - firstCallTime).toBeGreaterThanOrEqual(1000);
     });
   });
 

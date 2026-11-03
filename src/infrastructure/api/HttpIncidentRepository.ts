@@ -260,20 +260,7 @@ export class HttpIncidentRepository {
       if (typeof response.status !== 'number' || response.status === 0) throw new IncidentApiError('NetworkError');
       if (notFoundAsNull && response.status === 404) return NOT_FOUND;
       if (!response.ok) {
-        const retryAfterHeader = response.headers.get('retry-after');
-        let retryAfterMs: number | undefined;
-        if (retryAfterHeader) {
-          const parsedSeconds = Number(retryAfterHeader);
-          if (!Number.isNaN(parsedSeconds) && parsedSeconds >= 0) {
-            // RFC 7231 / RFC 9110 define Retry-After en segundos (delay-seconds)
-            retryAfterMs = parsedSeconds * 1000;
-          } else {
-            const httpDate = Date.parse(retryAfterHeader);
-            if (!Number.isNaN(httpDate)) {
-              retryAfterMs = Math.max(0, httpDate - Date.now());
-            }
-          }
-        }
+        const retryAfterMs = parseRetryAfter(response.headers.get('retry-after'));
         throw failureForStatus(response.status, retryAfterMs);
       }
       try {
@@ -301,4 +288,20 @@ function failureForStatus(status: number, retryAfterMs?: number): IncidentApiErr
   if (status === 429) return new IncidentApiError('RateLimitedError', status, retryAfterMs);
   if (status >= 500) return new IncidentApiError('ServerError', status, retryAfterMs);
   return new IncidentApiError('RejectedError', status);
+}
+
+function parseRetryAfter(header: string | null): number | undefined {
+  if (!header) return undefined;
+  const value = header.trim();
+  if (/^\d+$/.test(value)) {
+    const milliseconds = Number(value) * 1000;
+    return Number.isFinite(milliseconds) ? milliseconds : undefined;
+  }
+  if (!isHttpDate(value)) return undefined;
+  const httpDate = Date.parse(value);
+  return Number.isFinite(httpDate) ? Math.max(0, httpDate - Date.now()) : undefined;
+}
+
+function isHttpDate(value: string): boolean {
+  return /^(?:[A-Za-z]{3}, \d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}:\d{2} GMT|[A-Za-z]+, \d{2}-[A-Za-z]{3}-\d{2} \d{2}:\d{2}:\d{2} GMT|[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{2}:\d{2}:\d{2} \d{4})$/.test(value);
 }

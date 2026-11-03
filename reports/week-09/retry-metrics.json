@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "1498535892b50b2c0a09bf22b09d4b2ed4d29a31",
+  "commitSha": "e14c10e1836c48a63b720256e7a3affdf56a33fe",
   "generatedAt": "2026-11-03T02:16:00Z",
   "maxAttempts": 4,
   "baseDelayMs": 500,
@@ -14,7 +14,12 @@
       "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
       "evidence": "Escenario 503 permanente: 4 intentos totales observados (intento 1 + reintentos 2, 3, 4). Ningún 5to intento. callCount=4 verificado. Delays observados: 500ms, 1000ms, 2000ms (backoff exponencial 500*2^(n-1)).",
       "observedAttempts": 4,
-      "observedDelaysMs": [0, 500, 1000, 2000],
+      "observedDelaysMs": [
+        0,
+        500,
+        1000,
+        2000
+      ],
       "sameKeyVerified": false,
       "duplicatesObserved": 0
     },
@@ -25,29 +30,38 @@
       "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
       "evidence": "Escenario respuesta perdida en POST: 2 intentos totales (intento 1 pierde respuesta por socket.destroy(), intento 2 con misma Idempotency-Key recibe duplicate=true). historyLog del servidor: 1 entrada. incidentVersion=2 (no duplicado). callCount=2.",
       "observedAttempts": 2,
-      "observedDelaysMs": [0, 500],
+      "observedDelaysMs": [
+        0,
+        500
+      ],
       "sameKeyVerified": true,
       "duplicatesObserved": 0
     },
     {
-      "id": "observed-retry-after-0-05-seconds",
+      "id": "observed-retry-after-1-second",
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts",
-      "evidence": "Retry-After: '0.05' interpretado como 0.05 segundos = 50ms. Tiempo medido entre intento 1 y reintento >= 40ms. Test determinista con mockFetch, sin dependencia de red real. callCount=2, secondCallTime-firstCallTime>=40ms.",
+      "evidence": "Retry-After: '1' corresponde a 1 segundo entero conforme a HTTP. El test mide el tiempo entre intentos y verifica >=1000ms; Jest observó 1000ms de espera configurada. callCount=2.",
       "observedAttempts": 2,
-      "observedDelaysMs": [0, 50],
+      "observedDelaysMs": [
+        0,
+        1000
+      ],
       "sameKeyVerified": false,
       "duplicatesObserved": 0
     },
     {
-      "id": "observed-retry-after-50ms-core-test",
+      "id": "observed-retry-after-1-second-core-test",
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts",
-      "evidence": "Retry-After: '0.05' (0.05s=50ms) resuelto con delayMs=50ms. Antes del fix el valor '50' se interpretaba como 50000ms y agotaba el timeout de 30s de Jest. Fix: interpretación estricta de delay-seconds*1000. callCount=2. Test: 'reintenta automáticamente ante un error 429 respetando Retry-After' PASS (71ms totales).",
+      "evidence": "Retry-After: '1' corresponde a 1 segundo entero conforme a HTTP. El test de integración confirma dos llamadas y el telemetry reporta delayMs=1000. callCount=2.",
       "observedAttempts": 2,
-      "observedDelaysMs": [0, 50],
+      "observedDelaysMs": [
+        0,
+        1000
+      ],
       "sameKeyVerified": false,
       "duplicatesObserved": 0
     },
@@ -58,10 +72,12 @@
       "command": "npm test -- --ci --runInBand course-tests/week-09-resilience-core.test.ts course-tests/resilience/week-09-lost-response.test.ts",
       "evidence": "En dos tests independientes de idempotencia POST: capturedKeys[0]===capturedKeys[1] verificado. HttpIncidentRepository propaga el encabezado Idempotency-Key sin modificación en cada reintento. Ningún POST se repitió sin clave.",
       "observedAttempts": 2,
-      "observedDelaysMs": [0, 500],
+      "observedDelaysMs": [
+        0,
+        500
+      ],
       "sameKeyVerified": true,
       "duplicatesObserved": 0
     }
   ]
 }
-

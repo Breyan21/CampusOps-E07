@@ -133,7 +133,7 @@ describe('Semana 09 - Integrante 2: Core de Resiliencia, Caché y Reintentos', (
           return {
             ok: false,
             status: 429,
-            headers: new Headers({ 'retry-after': '0.05' }), // 0.05s = 50ms para la prueba determinista
+            headers: new Headers({ 'retry-after': '1' }), // delay-seconds HTTP válido: 1 segundo
             json: async () => ({ code: 'rate_limited' }),
           };
         }
