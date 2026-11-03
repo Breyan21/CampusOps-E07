@@ -14,12 +14,14 @@ export type IncidentApiErrorKind =
 export class IncidentApiError extends Error {
   readonly kind: IncidentApiErrorKind;
   readonly status: number | undefined;
+  readonly retryAfterMs: number | undefined;
 
-  constructor(kind: IncidentApiErrorKind, status?: number) {
+  constructor(kind: IncidentApiErrorKind, status?: number, retryAfterMs?: number) {
     super(`incident_api_${kind}`);
     this.name = 'IncidentApiError';
     this.kind = kind;
     this.status = status;
+    this.retryAfterMs = retryAfterMs;
   }
 }
 

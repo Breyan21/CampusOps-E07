@@ -9,6 +9,7 @@ import { canCreateIncident } from '../../domain/auth/permissions';
 import { createIdempotencyKey } from '../../application/incidents/CreateIncident';
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 import { isIncidentApiError } from '../../domain/errors/IncidentApiError';
+import type { GeocodingService } from '../../infrastructure/location/GeocodingService';
 
 interface Props {
   listIncidentsUseCase: ListIncidents;
@@ -16,6 +17,7 @@ interface Props {
   onSelectIncident: (id: string) => void;
   currentRole?: UserRole | null;
   currentActorId?: string | null;
+  geocodingService?: GeocodingService;
 }
 
 const categories: readonly IncidentCategory[] = [
@@ -30,6 +32,7 @@ export const IncidentListScreen: React.FC<Props> = ({
   onSelectIncident,
   currentRole,
   currentActorId,
+  geocodingService,
 }) => {
   const [incidents, setIncidents] = useState<readonly Incident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +41,7 @@ export const IncidentListScreen: React.FC<Props> = ({
   const [creating, setCreating] = useState(false);
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [category, setCategory] = useState<IncidentCategory>('maintenance');
   const [createError, setCreateError] = useState('');
   const [retryKey, setRetryKey] = useState<string | null>(null);
@@ -79,6 +83,20 @@ export const IncidentListScreen: React.FC<Props> = ({
     runLoad();
   };
 
+  const handleVerifyLocation = async () => {
+    if (!geocodingService || !location.trim()) return;
+    try {
+      const selection = await geocodingService.geocode(location);
+      if (selection.source === 'provider') {
+        setLocationStatus(`Coordenadas confirmadas: (${selection.latitude.toFixed(2)}, ${selection.longitude.toFixed(2)})`);
+      } else {
+        setLocationStatus('Proveedor no disponible o sin coordenadas. Se conservará como referencia manual.');
+      }
+    } catch {
+      setLocationStatus('Falla de red en mapas. Se conservará como referencia manual.');
+    }
+  };
+
   const submit = async () => {
     if (!hasSession || !role || !canCreateIncident(role)) {
       setCreateError('Permiso denegado: tu perfil no tiene autorización para crear incidencias.');
@@ -92,6 +110,7 @@ export const IncidentListScreen: React.FC<Props> = ({
       await createIncidentUseCase.execute({ category, description, location }, key);
       setDescription('');
       setLocation('');
+      setLocationStatus(null);
       setRetryKey(null);
       setCreating(false);
       reload();
@@ -138,10 +157,10 @@ export const IncidentListScreen: React.FC<Props> = ({
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card} onPress={() => onSelectIncident(item.id)}>
-            <Text style={styles.cardTitle}>{item.title ?? item.description}</Text>
+            <Text style={styles.cardTitle}>{item.description}</Text>
             <View style={styles.cardMeta}>
               <Text style={styles.cardStatus}>Estado: {item.status}</Text>
-              <Text style={styles.cardCategory}>Categoría: {item.category}</Text>
+              <Text style={styles.cardCategory}>{item.category}</Text>
             </View>
             {item.assignedTechnicianId ? (
               <Text style={styles.cardTech}>Técnico: {item.assignedTechnicianId}</Text>
@@ -162,11 +181,23 @@ export const IncidentListScreen: React.FC<Props> = ({
           />
           <TextInput
             accessibilityLabel="Ubicación"
-            placeholder="Ubicación"
+            placeholder="Ubicación (ej. Edificio A, Laboratorio o referencia)"
             value={location}
-            onChangeText={(value) => { setLocation(value); setRetryKey(null); }}
+            onChangeText={(value) => {
+              setLocation(value);
+              setRetryKey(null);
+              setLocationStatus(null);
+            }}
             style={styles.input}
           />
+          {geocodingService && location.trim().length > 0 ? (
+            <TouchableOpacity onPress={handleVerifyLocation} style={styles.verifyLocationButton}>
+              <Text style={styles.verifyLocationText}>Verificar coordenadas con mapa (opcional)</Text>
+            </TouchableOpacity>
+          ) : null}
+          {locationStatus ? (
+            <Text style={styles.locationStatusText}>{locationStatus}</Text>
+          ) : null}
           <View style={styles.categories}>
             {categories.map((item) => (
               <TouchableOpacity
@@ -272,6 +303,9 @@ const styles = StyleSheet.create({
   form: { backgroundColor: '#fff', padding: 14, gap: 10, marginTop: 8, borderRadius: 8 },
   formTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, fontSize: 14 },
+  verifyLocationButton: { alignSelf: 'flex-start', paddingVertical: 4 },
+  verifyLocationText: { fontSize: 12, color: '#0277bd', fontWeight: '600' },
+  locationStatusText: { fontSize: 12, color: '#555', fontStyle: 'italic' },
   categories: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   category: { paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#ccc', borderRadius: 16 },
   categoryText: { fontSize: 12, color: '#555' },
