@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "71c9727d967a07d3a3b30d463514219af243b909",
+  "commitSha": "728b8bb2f9bc08397841b0911b7631f316da4795",
   "decision": "Reintentar exclusivamente operaciones GET ante errores recuperables (408, 425, 429, 5xx, timeout) con backoff exponencial acotado a 4 intentos máximo y respeto estricto a Retry-After según RFC 7231 (delay-seconds). Permitir reintento de POST únicamente cuando exista una Idempotency-Key estable y no vacía, conservando la misma clave y el mismo cuerpo JSON en cada intento para evitar efectos duplicados. Ante fallo terminal del proveedor de geocodificación, activar fallback a ubicación manual sin inventar coordenadas. Nunca almacenar errores ni fallbacks como resultados válidos en caché.",
   "alternatives": [
     "Reintentos ilimitados con backoff: Sigue intentando indefinidamente ante cualquier error recuperable. Evita pérdidas de operación por fallas transitorias cortas, pero puede causar bucles infinitos, saturar el servidor y bloquear la UI durante períodos arbitrarios. No cumple el contrato de límite de 4 intentos publicado.",
