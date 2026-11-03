@@ -133,7 +133,7 @@ describe('Semana 09 - Integrante 2: Core de Resiliencia, Caché y Reintentos', (
           return {
             ok: false,
             status: 429,
-            headers: new Headers({ 'retry-after': '50' }), // 50ms para la prueba
+            headers: new Headers({ 'retry-after': '0.05' }), // 0.05s = 50ms para la prueba determinista
             json: async () => ({ code: 'rate_limited' }),
           };
         }
@@ -175,16 +175,20 @@ describe('Semana 09 - Integrante 2: Core de Resiliencia, Caché y Reintentos', (
           throw abortError;
         }
 
-        // En el reintento, el servidor responde con el resultado idempotente
+        // En el reintento, el servidor responde con el resultado idempotente cumpliendo el DTO
         return {
           ok: true,
           status: 200,
           headers: new Headers(),
           json: async () => ({
-            id: 'campus-inc-001',
-            version: 2,
-            status: 'resolved',
-            payload: { diagnosis: 'Falla corregida' },
+            incident: {
+              id: 'campus-inc-001',
+              version: 2,
+              status: 'resolved',
+              payload: { diagnosis: 'Falla corregida' },
+            },
+            operationId: idempotencyKey,
+            duplicate: true,
           }),
         };
       });
@@ -209,8 +213,9 @@ describe('Semana 09 - Integrante 2: Core de Resiliencia, Caché y Reintentos', (
       // Garantía de idempotencia: ambas llamadas usan la MISMA clave estable
       expect(capturedKeys[0]).toBe(idempotencyKey);
       expect(capturedKeys[1]).toBe(idempotencyKey);
-      expect(actionResult.id).toBe('campus-inc-001');
-      expect(actionResult.status).toBe('resolved');
+      expect(actionResult.incident.id).toBe('campus-inc-001');
+      expect(actionResult.incident.status).toBe('resolved');
+      expect(actionResult.duplicate).toBe(true);
     });
 
     it('no reintenta solicitudes que exceden el límite de 3 reintentos (intento 4 aborta)', async () => {

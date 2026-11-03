@@ -42,7 +42,7 @@ export class GeocodingService {
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
   private readonly cacheTtlMs: number;
-  private readonly scenario?: string;
+  private readonly scenario: string | undefined;
   private readonly accessToken?: string;
   private readonly actorId?: string;
 

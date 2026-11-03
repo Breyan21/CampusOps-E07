@@ -169,8 +169,8 @@ export class HttpIncidentRepository {
         method,
         status: retryStatus,
         attempt,
-        retryAfterMs,
-        idempotencyKey,
+        ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
+        ...(idempotencyKey !== undefined ? { idempotencyKey } : {}),
       });
 
       if (decision.retry) {
@@ -263,11 +263,15 @@ export class HttpIncidentRepository {
         const retryAfterHeader = response.headers.get('retry-after');
         let retryAfterMs: number | undefined;
         if (retryAfterHeader) {
-          const parsed = Number(retryAfterHeader);
-          if (!Number.isNaN(parsed) && parsed >= 0) {
-            // RFC 7231 suele especificar segundos (ej. "1" = 1000ms),
-            // mientras que valores >= 100 se tratan como milisegundos directos.
-            retryAfterMs = parsed < 100 ? parsed * 1000 : parsed;
+          const parsedSeconds = Number(retryAfterHeader);
+          if (!Number.isNaN(parsedSeconds) && parsedSeconds >= 0) {
+            // RFC 7231 / RFC 9110 define Retry-After en segundos (delay-seconds)
+            retryAfterMs = parsedSeconds * 1000;
+          } else {
+            const httpDate = Date.parse(retryAfterHeader);
+            if (!Number.isNaN(httpDate)) {
+              retryAfterMs = Math.max(0, httpDate - Date.now());
+            }
           }
         }
         throw failureForStatus(response.status, retryAfterMs);
