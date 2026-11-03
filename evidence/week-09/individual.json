@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "teamId": "equipo07",
+  "members": [
+    {
+      "studentId": "Laloaobes",
+      "commitShas": [
+        "59fe30c466207fb9d693d09699dd3c8ae7ade7da"
+      ],
+      "files": [
+        "src/course-evaluation/index.ts",
+        "src/domain/location/types.ts",
+        "docs/resilience-policy.md"
+      ],
+      "tests": [
+        "course-tests/public/week-09.test.ts"
+      ],
+      "reviews": [],
+      "prediction": "selectIncidentLocation seleccionará la ubicación manual ante datos externos inválidos, y planRetry respetará Retry-After, limitará los intentos y bloqueará POST sin clave de idempotencia.",
+      "command": "npx jest course-tests/public/week-09.test.ts --runInBand; npm run typecheck; npm run lint",
+      "observedResult": "Jest: PASS, 4 pruebas aprobadas. Typecheck: PASS. Lint: 0 errores y 1 advertencia preexistente de require() en course-tests/cloud-client.test.ts.",
+      "explanation": "Implementé los contratos de ubicación y reintentos, con validación de coordenadas, fallback manual sin coordenadas ficticias, configuración interna tipada para el límite y backoff, y documentación de Retry-After e idempotencia. La caché y el proveedor real permanecen pendientes del integrante 2."
+    },
+    {
+      "studentId": "Breyan21",
+      "commitShas": [
+        "4b9dbfa1a810ffe79151417d24fe58b66853dcd8"
+      ],
+      "files": [
+        "src/infrastructure/location/GeocodingService.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "src/domain/errors/IncidentApiError.ts",
+        "src/ui/incidents/IncidentListScreen.tsx",
+        "App.tsx",
+        "course-tests/week-09-resilience-core.test.ts"
+      ],
+      "tests": [
+        "course-tests/week-09-resilience-core.test.ts"
+      ],
+      "reviews": [],
+      "prediction": "Las consultas repetidas se resolveran desde la cache en memoria y las operaciones POST fallidas por timeout se reintentaran con la misma Idempotency-Key sin duplicar registros",
+      "command": "npx jest course-tests/week-09-resilience-core.test.ts",
+      "observedResult": "PASS course-tests/week-09-resilience-core.test.ts (todas las pruebas de cache, 429, reintentos idempotentes y limites de intento aprobadas)",
+      "explanation": "Implemente el servicio de geocodificacion con cache en memoria, el fallback manual en la UI y el transporte HTTP resiliente con reintentos idempotentes basados en planRetry."
+    },
+    {
+      "studentId": "MigueleArt",
+      "commitShas": [
+        ""
+      ],
+      "files": [
+        ""
+      ],
+      "tests": [
+        ""
+      ],
+      "reviews": [],
+      "prediction": "",
+      "command": "",
+      "observedResult": "",
+      "explanation": ""
+    }
+  ]
+}

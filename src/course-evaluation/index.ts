@@ -6,12 +6,26 @@ import type {
   RemoteResponse,
   SyncRecord,
 } from './contracts';
-import type { IncidentLocation } from '../campusops/contracts';
+import type {
+  IncidentLocationSelection,
+  RetryDecision,
+  RetryPolicyOptions,
+} from '../domain/location/types';
 import { parseRemoteResource as parseIncidentEnvelope } from '../infrastructure/api/remoteResource';
 
 function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
 }
+
+type RetryPolicyConfiguration = Readonly<{
+  maxAttempts: number;
+  baseDelayMs: number;
+}>;
+
+const RETRY_POLICY: RetryPolicyConfiguration = {
+  maxAttempts: 4,
+  baseDelayMs: 500,
+};
 
 export function redactForTelemetry(input: unknown): unknown {
   const sensitiveKeys = new Set(['authorization', 'password', 'token', 'accesstoken', 'refreshtoken', 'email', 'displayname', 'name', 'userid', 'reporterid', 'technicianid', 'assignedtechnicianid', 'location', 'latitude', 'longitude', 'photos', 'evidence', 'internalcomments', 'assignmenthistory']);
@@ -180,14 +194,36 @@ function areJsonValuesEqual(left: unknown, right: unknown): boolean {
     ));
 }
 
-export function planRetry(_input: Readonly<{
-  method: 'GET' | 'POST';
-  status: number | 'timeout';
-  attempt: number;
-  retryAfterMs?: number;
-  idempotencyKey?: string;
-}>): Readonly<{ retry: boolean; delayMs: number; requiresStableIdempotencyKey: boolean }> {
-  return pending('planRetry');
+export function planRetry(input: RetryPolicyOptions): RetryDecision {
+  const requiresStableIdempotencyKey = input.method === 'POST'
+    && (typeof input.idempotencyKey !== 'string' || input.idempotencyKey.trim().length === 0);
+  const canRetry = input.status === 'timeout'
+    || (
+      typeof input.status === 'number'
+      && Number.isInteger(input.status)
+      && (
+        input.status === 408
+        || input.status === 425
+        || input.status === 429
+        || (input.status >= 500 && input.status <= 599)
+      )
+    );
+  const validAttempt = Number.isInteger(input.attempt)
+    && input.attempt >= 1
+    && input.attempt < RETRY_POLICY.maxAttempts;
+
+  if (!canRetry || !validAttempt || requiresStableIdempotencyKey) {
+    return { retry: false, delayMs: 0, requiresStableIdempotencyKey };
+  }
+
+  const hasValidRetryAfter = typeof input.retryAfterMs === 'number'
+    && Number.isFinite(input.retryAfterMs)
+    && input.retryAfterMs >= 0;
+  const delayMs = hasValidRetryAfter
+    ? input.retryAfterMs
+    : RETRY_POLICY.baseDelayMs * (2 ** (input.attempt - 1));
+
+  return { retry: true, delayMs, requiresStableIdempotencyKey: false };
 }
 
 export function reduceRemoteResponses(_input: Readonly<{
@@ -203,7 +239,32 @@ export function reducePermissionLifecycle(
   return pending('reducePermissionLifecycle');
 }
 
-/** Week 09: see docs/CAMPUSOPS_API.md; this is not a completed solution. */
-export function selectIncidentLocation(_provider: unknown, _manualLabel: string): IncidentLocation {
-  return pending('selectIncidentLocation');
+export function selectIncidentLocation(
+  provider: unknown,
+  manualLabel: string,
+): IncidentLocationSelection {
+  if (typeof manualLabel !== 'string' || manualLabel.trim().length === 0) {
+    throw new TypeError('manualLabel must be a non-empty string');
+  }
+
+  if (typeof provider !== 'object' || provider === null || Array.isArray(provider)) {
+    return { source: 'manual', label: manualLabel };
+  }
+
+  const candidate = provider as Record<string, unknown>;
+  const { label, latitude, longitude } = candidate;
+  const isValid = typeof label === 'string'
+    && label.trim().length > 0
+    && typeof latitude === 'number'
+    && Number.isFinite(latitude)
+    && latitude >= -90
+    && latitude <= 90
+    && typeof longitude === 'number'
+    && Number.isFinite(longitude)
+    && longitude >= -180
+    && longitude <= 180;
+
+  return isValid
+    ? { source: 'provider', label, latitude, longitude }
+    : { source: 'manual', label: manualLabel };
 }

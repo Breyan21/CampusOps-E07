@@ -1,5 +1,6 @@
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 import { IncidentApiError, isIncidentApiError } from './IncidentApiError';
+import { planRetry } from '../../course-evaluation';
 import {
   type CreateIncidentRequestDto,
   type CreateIncidentResponseDto,
@@ -41,6 +42,11 @@ let sharedRefreshPromise: Promise<string | null> | null = null;
 /**
  * Cliente HTTP de incidencias. Devuelve únicamente DTOs con el sobre ya validado y
  * representa cada falla como IncidentApiError; nunca deja escapar la excepción original.
+ *
+ * Integra la política de reintentos acotada e idempotente (planRetry):
+ * - Respeta Retry-After y esperas progresivas finitas.
+ * - Corte estricto en intento 4 (máximo 3 reintentos).
+ * - En solicitudes POST, exige Idempotency-Key estable antes de reintentar.
  */
 export class HttpIncidentRepository {
   private readonly timeoutMs: number;
@@ -121,17 +127,69 @@ export class HttpIncidentRepository {
     }
   }
 
-  private async send(path: string, init: RequestInit, notFoundAsNull: boolean, retryCount = 0): Promise<unknown> {
+  private async send(
+    path: string,
+    init: RequestInit,
+    notFoundAsNull: boolean,
+    attempt = 1,
+    sessionRetryCount = 0,
+  ): Promise<unknown> {
     try {
       return await this.sendOnce(path, init, notFoundAsNull);
     } catch (error) {
-      // Sólo 401 (sesión expirada) se renueva; 403 es falta de permiso y no se reintenta.
+      // 1. Manejo de expiración de sesión ante 401 (single-flight)
       const expired = isIncidentApiError(error) && error.kind === 'UnauthorizedError' && error.status === 401;
-      if (!expired || retryCount > 0 || this.refreshToken === undefined) throw error;
-      const token = await this.refreshSession();
-      if (token === null) throw new IncidentApiError('UnauthorizedError', 401);
-      this.accessToken = token;
-      return this.send(path, init, notFoundAsNull, retryCount + 1);
+      if (expired && sessionRetryCount === 0 && this.refreshToken !== undefined) {
+        const token = await this.refreshSession();
+        if (token === null) throw new IncidentApiError('UnauthorizedError', 401);
+        this.accessToken = token;
+        return this.send(path, init, notFoundAsNull, attempt, sessionRetryCount + 1);
+      }
+
+      // 2. Manejo de reintentos acotados e idempotentes mediante planRetry
+      const headers = init.headers as Record<string, string> | undefined;
+      const idempotencyKey = headers?.['Idempotency-Key']
+        ?? headers?.['idempotency-key']
+        ?? headers?.['IDEMPOTENCY-KEY'];
+      const method = (init.method?.toUpperCase() as 'GET' | 'POST') ?? 'GET';
+
+      let retryStatus: number | 'timeout' = 'timeout';
+      let retryAfterMs: number | undefined;
+
+      if (isIncidentApiError(error)) {
+        if (error.kind === 'TimeoutError' || error.kind === 'NetworkError') {
+          retryStatus = 'timeout';
+        } else if (typeof error.status === 'number') {
+          retryStatus = error.status;
+          retryAfterMs = error.retryAfterMs;
+        }
+      }
+
+      const decision = planRetry({
+        method,
+        status: retryStatus,
+        attempt,
+        retryAfterMs,
+        idempotencyKey,
+      });
+
+      if (decision.retry) {
+        logSafeTelemetry('incident_api_retrying', {
+          operationMethod: method,
+          attempt,
+          nextAttempt: attempt + 1,
+          delayMs: decision.delayMs,
+        });
+
+        if (decision.delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, decision.delayMs));
+        }
+
+        return this.send(path, init, notFoundAsNull, attempt + 1, sessionRetryCount);
+      }
+
+      // Si no califica para reintento o se excedió el límite de intentos, se propaga el error
+      throw error;
     }
   }
 
@@ -201,7 +259,19 @@ export class HttpIncidentRepository {
       // Sin código HTTP (status 0 o ausente) la respuesta no llegó del servidor: es falla de red.
       if (typeof response.status !== 'number' || response.status === 0) throw new IncidentApiError('NetworkError');
       if (notFoundAsNull && response.status === 404) return NOT_FOUND;
-      if (!response.ok) throw failureForStatus(response.status);
+      if (!response.ok) {
+        const retryAfterHeader = response.headers.get('retry-after');
+        let retryAfterMs: number | undefined;
+        if (retryAfterHeader) {
+          const parsed = Number(retryAfterHeader);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            // RFC 7231 suele especificar segundos (ej. "1" = 1000ms),
+            // mientras que valores >= 100 se tratan como milisegundos directos.
+            retryAfterMs = parsed < 100 ? parsed * 1000 : parsed;
+          }
+        }
+        throw failureForStatus(response.status, retryAfterMs);
+      }
       try {
         return await response.json();
       } catch {
@@ -222,9 +292,9 @@ export class HttpIncidentRepository {
   }
 }
 
-function failureForStatus(status: number): IncidentApiError {
+function failureForStatus(status: number, retryAfterMs?: number): IncidentApiError {
   if (status === 401 || status === 403) return new IncidentApiError('UnauthorizedError', status);
-  if (status === 429) return new IncidentApiError('RateLimitedError', status);
-  if (status >= 500) return new IncidentApiError('ServerError', status);
+  if (status === 429) return new IncidentApiError('RateLimitedError', status, retryAfterMs);
+  if (status >= 500) return new IncidentApiError('ServerError', status, retryAfterMs);
   return new IncidentApiError('RejectedError', status);
 }

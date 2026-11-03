@@ -15,6 +15,7 @@ import { SessionStatusBar } from './src/ui/auth/SessionStatusBar';
 import { LoginModal } from './src/ui/auth/LoginModal';
 import { IncidentListScreen } from './src/ui/incidents/IncidentListScreen';
 import { IncidentDetailScreen } from './src/ui/incidents/IncidentDetailScreen';
+import { GeocodingService } from './src/infrastructure/location/GeocodingService';
 
 const backendUrl = process.env.EXPO_PUBLIC_COURSE_BACKEND_URL ?? 'http://127.0.0.1:4310';
 
@@ -32,6 +33,8 @@ const repository = new CampusOpsIncidentRepository({
     if (event.type === 'expired') void authService.setExpired();
   },
 });
+
+const geocodingService = new GeocodingService({ baseUrl: backendUrl });
 
 const listIncidentsUseCase = new ListIncidents(repository);
 const getIncidentDetailUseCase = new GetIncidentDetail(repository);
@@ -98,6 +101,7 @@ export default function App() {
             onSelectIncident={setSelectedIncidentId}
             currentRole={currentRole}
             currentActorId={currentActorId}
+            geocodingService={geocodingService}
           />
         ) : (
           <IncidentDetailScreen
