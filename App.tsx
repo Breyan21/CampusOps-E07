@@ -34,7 +34,16 @@ const repository = new CampusOpsIncidentRepository({
   },
 });
 
-const geocodingService = new GeocodingService({ baseUrl: backendUrl });
+const geocodingProvider = process.env.EXPO_PUBLIC_GEOCODING_PROVIDER === 'course' ? 'course' : 'nominatim';
+const geocodingService = new GeocodingService({
+  baseUrl: geocodingProvider === 'nominatim'
+    ? process.env.EXPO_PUBLIC_NOMINATIM_URL ?? 'https://nominatim.openstreetmap.org'
+    : backendUrl,
+  provider: geocodingProvider,
+  courseBaseUrl: backendUrl,
+  nominatimBaseUrl: process.env.EXPO_PUBLIC_NOMINATIM_URL ?? 'https://nominatim.openstreetmap.org',
+  appIdentifier: 'CampusOps-E07/1.0 (academic project)',
+});
 
 const listIncidentsUseCase = new ListIncidents(repository);
 const getIncidentDetailUseCase = new GetIncidentDetail(repository);

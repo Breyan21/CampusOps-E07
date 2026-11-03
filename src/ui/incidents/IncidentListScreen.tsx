@@ -10,6 +10,7 @@ import { createIdempotencyKey } from '../../application/incidents/CreateIncident
 import { logSafeTelemetry } from '../../telemetry/safeTelemetry';
 import { isIncidentApiError } from '../../domain/errors/IncidentApiError';
 import type { GeocodingService } from '../../infrastructure/location/GeocodingService';
+import type { ProviderIncidentLocation } from '../../domain/location/types';
 
 interface Props {
   listIncidentsUseCase: ListIncidents;
@@ -42,6 +43,7 @@ export const IncidentListScreen: React.FC<Props> = ({
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
+  const [resolvedLocation, setResolvedLocation] = useState<ProviderIncidentLocation | null>(null);
   const [category, setCategory] = useState<IncidentCategory>('maintenance');
   const [createError, setCreateError] = useState('');
   const [retryKey, setRetryKey] = useState<string | null>(null);
@@ -88,11 +90,14 @@ export const IncidentListScreen: React.FC<Props> = ({
     try {
       const selection = await geocodingService.geocode(location);
       if (selection.source === 'provider') {
-        setLocationStatus(`Coordenadas confirmadas: (${selection.latitude.toFixed(2)}, ${selection.longitude.toFixed(2)})`);
+        setResolvedLocation(selection);
+        setLocationStatus(`Ubicación confirmada: ${selection.label} (${selection.latitude}, ${selection.longitude}). Se guardarán la referencia y las coordenadas.`);
       } else {
+        setResolvedLocation(null);
         setLocationStatus('Proveedor no disponible o sin coordenadas. Se conservará como referencia manual.');
       }
     } catch {
+      setResolvedLocation(null);
       setLocationStatus('Falla de red en mapas. Se conservará como referencia manual.');
     }
   };
@@ -107,10 +112,14 @@ export const IncidentListScreen: React.FC<Props> = ({
     const key = retryKey ?? createIdempotencyKey();
     setRetryKey(key);
     try {
-      await createIncidentUseCase.execute({ category, description, location }, key);
+      const locationForSubmission = resolvedLocation
+        ? `${location.trim()} | ${resolvedLocation.label} [lat=${resolvedLocation.latitude}, lon=${resolvedLocation.longitude}]`
+        : location;
+      await createIncidentUseCase.execute({ category, description, location: locationForSubmission }, key);
       setDescription('');
       setLocation('');
       setLocationStatus(null);
+      setResolvedLocation(null);
       setRetryKey(null);
       setCreating(false);
       reload();
@@ -187,12 +196,31 @@ export const IncidentListScreen: React.FC<Props> = ({
               setLocation(value);
               setRetryKey(null);
               setLocationStatus(null);
+              setResolvedLocation(null);
             }}
             style={styles.input}
           />
           {geocodingService && location.trim().length > 0 ? (
             <TouchableOpacity onPress={handleVerifyLocation} style={styles.verifyLocationButton}>
-              <Text style={styles.verifyLocationText}>Verificar coordenadas con mapa (opcional)</Text>
+              <Text style={styles.verifyLocationText}>Buscar coordenadas (opcional)</Text>
+            </TouchableOpacity>
+          ) : null}
+          {geocodingService?.attribution ? (
+            <Text style={styles.locationAttribution}>{geocodingService.attribution}. Consulta sólo al pulsar el botón.</Text>
+          ) : null}
+          {geocodingService ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => {
+                geocodingService.setProvider(geocodingService.currentProvider === 'nominatim' ? 'course' : 'nominatim');
+                setResolvedLocation(null);
+                setLocationStatus(null);
+              }}
+              style={styles.verifyLocationButton}
+            >
+              <Text style={styles.verifyLocationText}>
+                Cambiar proveedor a {geocodingService.currentProvider === 'nominatim' ? 'simulador de curso' : 'OpenStreetMap'}
+              </Text>
             </TouchableOpacity>
           ) : null}
           {locationStatus ? (
@@ -305,6 +333,7 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, fontSize: 14 },
   verifyLocationButton: { alignSelf: 'flex-start', paddingVertical: 4 },
   verifyLocationText: { fontSize: 12, color: '#0277bd', fontWeight: '600' },
+  locationAttribution: { fontSize: 11, color: '#666', marginTop: 2 },
   locationStatusText: { fontSize: 12, color: '#555', fontStyle: 'italic' },
   categories: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   category: { paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#ccc', borderRadius: 16 },

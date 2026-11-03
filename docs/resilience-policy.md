@@ -15,33 +15,68 @@ de red, la caché en memoria y la interfaz corresponden a `GeocodingService.ts`,
 
 ## Proveedor externo y límites
 
-El proyecto todavía no identifica un proveedor externo real de mapas o
-geocodificación en producción comercial. La selección del servicio definitivo,
-sus cuotas, términos de uso, retención de consultas y configuración de
-credenciales quedan pendientes de confirmación del equipo; esta política no
-atribuye una cuota comercial ni una integración propietaria a ningún proveedor.
+El adaptador admite dos proveedores: `nominatim` (predeterminado para la
+ejecución externa del hito) y `course` (doble determinista para pruebas). Se
+elige el inicial con `EXPO_PUBLIC_GEOCODING_PROVIDER` y la app permite cambiar
+entre los dos en runtime desde el formulario, sin recompilar. Al cambiar se
+vacía la caché para no mezclar resultados. La URL de Nominatim se puede cambiar
+con `EXPO_PUBLIC_NOMINATIM_URL`; el doble usa
+`EXPO_PUBLIC_COURSE_BACKEND_URL`.
+
+La integración externa usa la búsqueda de Nominatim en OpenStreetMap con
+`format=jsonv2`, `limit=1` e idioma español. La búsqueda sólo ocurre cuando el
+usuario pulsa **Buscar coordenadas**; no hay autocompletado ni consultas en cada
+tecla. El cliente se identifica como `CampusOps-E07/1.0 (academic project)` y
+muestra la atribución `© OpenStreetMap contributors`. El código limita las
+solicitudes a una por segundo, cachea consultas y deja el endpoint configurable
+para poder cambiarlo. La política del servidor público limita el uso a una
+solicitud por segundo, requiere User-Agent/Referer identificable, atribución,
+prohíbe enviar datos personales o confidenciales y desaconseja usos intensivos.
+No debe tratarse como SLA de producción; si las necesidades exceden este uso
+académico, se debe cambiar a un servicio contratado o administrado por el equipo.
+Fuentes oficiales: [política de uso de Nominatim](https://operations.osmfoundation.org/policies/nominatim/)
+y [API de búsqueda](https://nominatim.org/release-docs/latest/api/Search/).
+
+### Evidencia de ejecución externa
+
+El 2026-11-03T03:44:15Z se ejecutó `GeocodingService` contra Nominatim con
+`provider: nominatim`, User-Agent identificable y la búsqueda ficticia
+`CampusOps edificio ficticio de prueba Ciudad de México`. El proveedor respondió
+HTTP 200 sin coincidencias (`[]`); el servicio devolvió la referencia con
+`source: manual` y `cacheSize: 0`. El 2026-11-03T03:46:45Z se ejecutó de nuevo
+el adaptador con el fixture público `Palacio de Bellas Artes, Ciudad de México`:
+devolvió `source: provider`, etiqueta de Nominatim y coordenadas
+`19.4355009, -99.1412585`, con `cacheSize: 1`. El segundo fixture es un lugar
+público, no una ubicación de incidencia ni dato personal. Estas dos llamadas
+documentan los caminos de fallback y coincidencia del adaptador real; las
+pruebas reproducibles de fallos siguen usando el doble del curso. Las métricas
+y pruebas históricas de `week-09-final` pertenecen al SHA que indican; el código
+modificado en esta rama debe volver a verificarse antes de crear una nueva
+etiqueta de entrega.
 
 El backend del curso ofrece `GET /v1/geocoding?q=...` como doble determinista
 para pruebas y evaluación académica. Devuelve ubicaciones sintéticas y escenarios
 controlados, incluidos 429 con `Retry-After`, datos incompletos y coordenadas
-inválidas. No consulta lugares reales, no sustituye al proveedor de producción
-y no debe exponerse a Internet. Toda integración real dependerá de conectividad
-y deberá evitar enviar datos personales en las consultas; sólo se usarán
-referencias sintéticas durante las pruebas del curso.
+inválidas. No consulta lugares reales y no debe exponerse a Internet. Las
+ejecuciones contra el doble no se presentan como evidencia de ejecución externa.
+En ambos proveedores se envían sólo consultas que el usuario inicia y no se
+incluyen nombres, fotos, comentarios ni datos de una incidencia en telemetría.
+El timeout por solicitud es 3000 ms por defecto; los errores terminan en caché
+válida o captura manual sin coordenadas inventadas.
 
-Hasta que se seleccione un proveedor final, se documentan los límites observados
-en el entorno controlado y las salvaguardas implementadas: tiempos máximos de
-espera acotados (3000 ms por defecto en geocodificación), reintentos limitados
-y fallback manual inmediato ante contingencias.
+Si Nominatim devuelve una coincidencia, la UI conserva la referencia escrita y
+añade la etiqueta y latitud/longitud a la cadena `location` que acepta el
+contrato actual de creación de incidencias. Si no hay resultado o el proveedor
+falla, se envía sólo la ubicación manual introducida.
 
 ## Estrategia de caché
 
 El adaptador `GeocodingService` implementa una caché en memoria indexada por
-consulta normalizada (`query.trim().toLowerCase()`). Sus propiedades y reglas
+consulta normalizada (`query.trim().replace(/\s+/g, ' ').toLowerCase()`). Sus propiedades y reglas
 operativas son:
 
 - **Clave normalizada:** Convierte el texto de búsqueda a minúsculas y colapsa
-  espacios en blanco superfluos para maximizar los aciertos en caché ante ligeras
+  espacios en blanco internos superfluos para maximizar los aciertos en caché ante ligeras
   variaciones tipográficas o de espaciado introducidas por el usuario.
 - **TTL acotado:** Conserva las entradas válidas durante un TTL de 5 minutos
   (`DEFAULT_CACHE_TTL_MS = 300_000`), evitando consultas redundantes hacia el
@@ -100,11 +135,13 @@ backoff. Un estado numérico no entero, un intento no entero, menor que 1 o
 mayor/igual al límite, y cualquier error no recuperable producen una decisión
 sin reintento y retraso cero.
 
-En el cliente HTTP `HttpIncidentRepository`, el encabezado `Retry-After` se
+En los adaptadores HTTP, el encabezado `Retry-After` se
 interpreta de acuerdo con el estándar HTTP RFC 7231 / RFC 9110: cuando contiene
-un número, representa segundos (`delay-seconds`) y se convierte a milisegundos
-(`parsedSeconds * 1000`); si contiene una fecha HTTP-Date, se calcula la
-diferencia contra el reloj actual.
+un entero, representa segundos (`delay-seconds`) y se convierte a milisegundos;
+si contiene una fecha HTTP-Date, se calcula la diferencia contra el reloj actual.
+Una respuesta 429 transitoria se reintenta cuando la política lo permite y se
+respeta el tiempo indicado; si se agotan los intentos, se usa caché válida o
+captura manual.
 
 Los `GET` pueden reintentarse ante errores recuperables. Un `POST` sólo puede
 reintentarse si recibe una `idempotencyKey` no vacía; la decisión devuelve
@@ -139,8 +176,8 @@ duplicidad de efectos en el servidor.
   valores predeterminados que satisfacen el contrato público.
 - **Retry-After prevalece:** respeta la indicación del servidor conforme a
   RFC 7231, aunque puede aumentar el tiempo antes de completar la operación.
-  La política no lo limita; el adaptador implementa esperas compatibles con
-  los temporizadores de su runtime sin acortar la espera solicitada.
+  La política no lo acorta; el adaptador Nominatim también impone un mínimo de
+  un segundo entre solicitudes.
 - **Clave obligatoria para repetir POST:** reduce duplicados tras respuestas
   perdidas. Requiere que el cliente mantenga la misma clave y contenido;
   `HttpIncidentRepository` asegura la propagación de `Idempotency-Key` en cada
@@ -150,10 +187,10 @@ duplicidad de efectos en el servidor.
   almacena datos exitosos de proveedor; ante fallas de red o 429 permite
   recurrir a un valor previo o activar de inmediato el fallback manual. Al ser
   volátil, no persiste tras cerrar la aplicación.
-- **Proveedor de producción pendiente:** elegir uno sin conocer sus cuotas,
-  privacidad y disponibilidad sería una decisión no respaldada por la evidencia
-  actual; el simulador del curso permite validar todos los casos de resiliencia
-  de forma determinista.
+- **Proveedor público reemplazable:** Nominatim permite demostrar una ejecución
+  real con una consulta iniciada por el usuario y datos no personales. Su baja
+  capacidad y política de uso hacen que sea adecuado sólo para esta demostración
+  académica; el doble del curso sigue siendo la opción reproducible para pruebas.
 
 ## Verificación
 
