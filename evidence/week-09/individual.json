@@ -25,19 +25,24 @@
     {
       "studentId": "Breyan21",
       "commitShas": [
-        ""
+        "4b9dbfa1a810ffe79151417d24fe58b66853dcd8"
       ],
       "files": [
-        ""
+        "src/infrastructure/location/GeocodingService.ts",
+        "src/infrastructure/api/HttpIncidentRepository.ts",
+        "src/domain/errors/IncidentApiError.ts",
+        "src/ui/incidents/IncidentListScreen.tsx",
+        "App.tsx",
+        "course-tests/week-09-resilience-core.test.ts"
       ],
       "tests": [
-        ""
+        "course-tests/week-09-resilience-core.test.ts"
       ],
       "reviews": [],
-      "prediction": "",
-      "command": "",
-      "observedResult": "",
-      "explanation": ""
+      "prediction": "Las consultas repetidas se resolveran desde la cache en memoria y las operaciones POST fallidas por timeout se reintentaran con la misma Idempotency-Key sin duplicar registros",
+      "command": "npx jest course-tests/week-09-resilience-core.test.ts",
+      "observedResult": "PASS course-tests/week-09-resilience-core.test.ts (todas las pruebas de cache, 429, reintentos idempotentes y limites de intento aprobadas)",
+      "explanation": "Implemente el servicio de geocodificacion con cache en memoria, el fallback manual en la UI y el transporte HTTP resiliente con reintentos idempotentes basados en planRetry."
     },
     {
       "studentId": "MigueleArt",
