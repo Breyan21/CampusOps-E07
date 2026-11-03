@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "1498535892b50b2c0a09bf22b09d4b2ed4d29a31",
+  "commitSha": "71e0a1b45bc60483e6fe428701580e31343c58cb",
   "generatedAt": "2026-11-03T02:16:00Z",
   "checks": [
     {
@@ -65,8 +65,7 @@
       "status": "pass",
       "scenarioType": "boundary",
       "command": "npm test -- --ci --runInBand course-tests/resilience/week-09-lost-response.test.ts course-tests/week-09-resilience-core.test.ts",
-      "evidence": "Retry-After: '0.05' (0.05 segundos = 50ms) es interpretado como delay en segundos conforme a RFC 7231. El reintento ocurre >=40ms después (delta medido en segundCallTime - firstCallTime). Antes del fix, '50' era tratado como segundos (50000ms) causando timeout. Tests: 'respeta el encabezado Retry-After en segundos según el estándar HTTP RFC 7231' y 'reintenta automáticamente ante un error 429 respetando Retry-After' PASS."
+      "evidence": "Retry-After: '1' (1 segundo según delay-seconds de HTTP) fue respetado: el segundo intento ocurrió al menos 1000ms después del primero. Test: 'respeta el encabezado Retry-After en segundos según el estándar HTTP RFC 7231' PASS."
     }
   ]
 }
-
